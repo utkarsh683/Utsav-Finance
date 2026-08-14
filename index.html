@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Utsav Hisab – Complete ERP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    :root { --sidebar-width: 250px; --primary-deep: #1a2a4a; --primary-gold: #c9a84c; --bg-light: #f4f6fa; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-light); overflow-x: hidden; }
+    .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: var(--sidebar-width); background: var(--primary-deep); color: #fff; padding: 1rem 0; overflow-y: auto; z-index: 1050; transition: transform 0.3s ease; }
+    .sidebar-brand { font-size: 1.5rem; font-weight: 700; padding: 0 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--primary-gold); letter-spacing: 0.5px; }
+    .sidebar-brand i { font-size: 1.8rem; margin-right: 10px; }
+    .sidebar .nav-link { color: rgba(255,255,255,0.7); padding: 0.7rem 1.25rem; margin: 0.1rem 0.5rem; border-radius: 8px; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: rgba(201,168,76,0.2); }
+    .sidebar .nav-link i { font-size: 1.2rem; width: 24px; text-align: center; }
+    .main-content { margin-left: var(--sidebar-width); padding: 1.5rem; min-height: 100vh; }
+    .top-nav { background: #fff; border-radius: 16px; padding: 0.75rem 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .top-nav .page-title { font-weight: 700; font-size: 1.3rem; color: var(--primary-deep); }
+    .top-nav .page-title small { font-weight: 400; font-size: 0.85rem; color: #6c757d; margin-left: 8px; }
+    .global-search { position: relative; min-width: 200px; flex: 1; }
+    .global-search input { border-radius: 50px; padding-left: 2.5rem; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 0.9rem; width: 100%; }
+    .global-search input:focus { border-color: var(--primary-gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.2); }
+    .global-search i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+    .global-search-results { position: absolute; top: 110%; left: 0; right: 0; background: #fff; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); max-height: 340px; overflow-y: auto; z-index: 1090; display: none; padding: 0.5rem 0; }
+    .global-search-results .result-item { padding: 0.6rem 1.2rem; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+    .global-search-results .result-item:hover { background: #f8fafc; }
+    .global-search-results .result-item .badge-module { font-size: 0.65rem; margin-left: 8px; background: var(--primary-deep); color: #fff; }
+    .stat-card { background: #fff; border-radius: 16px; padding: 1.25rem 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.2s; height: 100%; border-left: 4px solid var(--primary-gold); }
+    .stat-card .stat-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; font-weight: 600; }
+    .stat-card .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--primary-deep); }
+    .stat-card .stat-icon { font-size: 2.2rem; color: var(--primary-gold); opacity: 0.5; }
+    .table-wrapper { background: #fff; border-radius: 16px; padding: 1.25rem 1.25rem 0.25rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+    .table-toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 1rem; }
+    .table-toolbar .form-control, .table-toolbar .form-select { border-radius: 50px; font-size: 0.85rem; border-color: #e2e8f0; background: #f8fafc; }
+    .table-toolbar .form-control:focus, .table-toolbar .form-select:focus { border-color: var(--primary-gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+    .table-toolbar .btn-outline-gold { border-color: var(--primary-gold); color: var(--primary-gold); border-radius: 50px; }
+    .table-toolbar .btn-outline-gold:hover { background: var(--primary-gold); color: #fff; }
+    .table-toolbar .btn-gold { background: var(--primary-gold); color: #fff; border-radius: 50px; border: none; }
+    .table-toolbar .btn-gold:hover { background: #b8943a; color: #fff; }
+    .table-responsive { border-radius: 12px; }
+    .table th { font-weight: 600; color: #1e293b; border-top: none; cursor: pointer; white-space: nowrap; user-select: none; }
+    .table th:hover { color: var(--primary-gold); }
+    .table th i { font-size: 0.7rem; margin-left: 4px; opacity: 0.5; }
+    .table td { vertical-align: middle; font-size: 0.9rem; }
+    .badge-status { padding: 0.35rem 0.75rem; border-radius: 50px; font-weight: 500; font-size: 0.75rem; }
+    .action-btns .btn { padding: 0.15rem 0.5rem; font-size: 0.8rem; border-radius: 30px; }
+    .pagination-wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 0 0.25rem; }
+    .pagination-wrap .page-link { border-radius: 30px; color: var(--primary-deep); border-color: #e2e8f0; font-size: 0.85rem; }
+    .pagination-wrap .page-link.active { background: var(--primary-gold); border-color: var(--primary-gold); color: #fff; }
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; }
+    .toast { border-radius: 12px; border: none; box-shadow: 0 8px 30px rgba(0,0,0,0.12); background: #fff; min-width: 280px; }
+    .toast .toast-header { border-bottom: none; font-weight: 600; color: var(--primary-deep); }
+    .toast .toast-body { font-size: 0.9rem; color: #334155; }
+    .sidebar-toggle { display: none; background: var(--primary-deep); color: #fff; border: none; border-radius: 8px; padding: 0.4rem 0.8rem; font-size: 1.2rem; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1040; }
+    @media (max-width: 992px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.show { display: block; }
+      .main-content { margin-left: 0; padding: 1rem; }
+      .sidebar-toggle { display: inline-block; }
+      .top-nav { flex-direction: column; align-items: stretch; }
+      .global-search { min-width: 100%; }
+      .header-actions { width: 100%; justify-content: center; }
+    }
+    @media (max-width: 576px) {
+      .stat-card .stat-value { font-size: 1.3rem; }
+      .table-toolbar { flex-direction: column; align-items: stretch; }
+      .table-toolbar .d-flex { flex-wrap: wrap; }
+      .header-actions .btn { flex: 1; }
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: var(--primary-gold); border-radius: 10px; }
+    .modal-content { border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+    .modal-header { border-bottom: 1px solid #f1f5f9; padding: 1.25rem 1.5rem; }
+    .modal-header .modal-title { font-weight: 700; color: var(--primary-deep); }
+    .modal-footer { border-top: 1px solid #f1f5f9; padding: 1rem 1.5rem; }
+    .form-label { font-weight: 500; font-size: 0.85rem; color: #475569; }
+    .form-control, .form-select { border-radius: 10px; border-color: #e2e8f0; }
+    .form-control:focus, .form-select:focus { border-color: var(--primary-gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+    .status-profit { background: #dcfce7; color: #166534; }
+    .status-loss { background: #fee2e2; color: #991b1b; }
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+    .event-badge { background: var(--primary-deep); color: #fff; padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.7rem; font-weight: 500; }
+    .text-gold { color: var(--primary-gold); }
+    .bg-gold-soft { background: rgba(201,168,76,0.1); }
+    .btn-gold-outline { border: 1px solid var(--primary-gold); color: var(--primary-gold); border-radius: 50px; background: transparent; }
+    .btn-gold-outline:hover { background: var(--primary-gold); color: #fff; }
+    .filter-group { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    .filter-group .form-select, .filter-group .form-control { min-width: 130px; }
+    .empty-state { padding: 3rem 1rem; text-align: center; color: #94a3b8; }
+    .empty-state i { font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.3; }
+    .quick-entry-card { background: #fff; border-radius: 16px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+    .quick-entry-card .form-label { font-weight: 600; }
+    .entry-type-toggle .btn { border-radius: 30px; padding: 0.4rem 1.2rem; }
+    .entry-type-toggle .btn.active { background: var(--primary-gold); color: #fff; border-color: var(--primary-gold); }
+    .header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<!-- ============ SIDEBAR OVERLAY (mobile) ============ -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand d-flex align-items-center">
+    <i class="bi bi-calendar-event"></i>
+    <span>Utsav Hisab</span>
+  </div>
+  <nav class="nav flex-column mt-3">
+    <a class="nav-link active" data-page="dashboard" href="#"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+    <a class="nav-link" data-page="addentry" href="#"><i class="bi bi-plus-circle-fill"></i> Quick Entry</a>
+    <a class="nav-link" data-page="donations" href="#"><i class="bi bi-heart-fill"></i> Donations</a>
+    <a class="nav-link" data-page="expenses" href="#"><i class="bi bi-wallet2"></i> Expenses</a>
+    <a class="nav-link" data-page="profitloss" href="#"><i class="bi bi-graph-up-arrow"></i> Profit &amp; Loss</a>
+    <a class="nav-link" data-page="eventreport" href="#"><i class="bi bi-bar-chart-fill"></i> Event Report</a>
+    <a class="nav-link" data-page="users" href="#"><i class="bi bi-people-fill"></i> Users</a>
+    <a class="nav-link" data-page="activitylog" href="#"><i class="bi bi-clock-history"></i> Activity Log</a>
+  </nav>
+  <div class="position-absolute bottom-0 start-0 end-0 p-3" style="border-top:1px solid rgba(255,255,255,0.06);">
+    <small class="text-white-50 d-block text-center" style="font-size:0.7rem;">v2.0 &bull; Local Storage</small>
+  </div>
+</aside>
+
+<!-- ============ MAIN CONTENT ============ -->
+<div class="main-content" id="mainContent">
+
+  <!-- TOP NAV -->
+  <div class="top-nav">
+    <div class="d-flex align-items-center gap-3">
+      <button class="sidebar-toggle" id="sidebarToggle"><i class="bi bi-list"></i></button>
+      <span class="page-title" id="pageTitle">Dashboard <small>overview</small></span>
+    </div>
+    <div class="global-search">
+      <i class="bi bi-search"></i>
+      <input type="text" class="form-control" id="globalSearchInput" placeholder="Search anything..." autocomplete="off" />
+      <div class="global-search-results" id="globalSearchResults"></div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-gold btn-sm" id="headerAddDonation"><i class="bi bi-plus-lg"></i> Donation</button>
+      <button class="btn btn-gold btn-sm" id="headerAddExpense"><i class="bi bi-plus-lg"></i> Expense</button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: DASHBOARD -->
+  <!-- ============================================================ -->
+  <div class="page-section active" id="page-dashboard">
+    <!-- filter row -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <label class="form-label">Search</label>
+        <input type="text" class="form-control" id="dashSearch" placeholder="Search donations / expenses..." />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Event</label>
+        <select class="form-select" id="dashEvent">
+          <option value="all">All Events</option>
+          <option value="Janmashtami">Janmashtami</option>
+          <option value="Ganesh Utsav ">Ganesh Utsav </option>
+          <option value="Navratri">Navratri</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Date Range</label>
+        <select class="form-select" id="dashDateRange">
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month" selected>This Month</option>
+          <option value="year">This Year</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-gold w-100" id="dashApplyFilter"><i class="bi bi-funnel"></i> Apply</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4" id="dashStats">
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-label">Total Donation</div><div class="stat-value" id="dashTotalDonation">₹0</div></div><div class="stat-icon"><i class="bi bi-heart"></i></div></div></div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card" style="border-left-color:#ef4444;"><div class="d-flex justify-content-between"><div><div class="stat-label">Total Expense</div><div class="stat-value" id="dashTotalExpense">₹0</div></div><div class="stat-icon" style="color:#ef4444;"><i class="bi bi-wallet"></i></div></div></div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card" style="border-left-color:#3b82f6;"><div class="d-flex justify-content-between"><div><div class="stat-label">Balance</div><div class="stat-value" id="dashBalance">₹0</div></div><div class="stat-icon" style="color:#3b82f6;"><i class="bi bi-cash-stack"></i></div></div></div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card" style="border-left-color:#8b5cf6;"><div class="d-flex justify-content-between"><div><div class="stat-label">Profit / Loss</div><div class="stat-value" id="dashProfitLoss">₹0</div></div><div class="stat-icon" style="color:#8b5cf6;"><i class="bi bi-graph-up"></i></div></div></div>
+      </div>
+    </div>
+
+    <!-- Charts placeholder + recent -->
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="table-wrapper">
+          <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Recent Donations</h6>
+          <div id="dashRecentDonations" style="max-height:240px;overflow-y:auto;"><p class="text-muted small">No donations yet</p></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="table-wrapper">
+          <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Recent Expenses</h6>
+          <div id="dashRecentExpenses" style="max-height:240px;overflow-y:auto;"><p class="text-muted small">No expenses yet</p></div>
+        </div>
+      </div>
+    </div>
+    <!-- Event summary -->
+    <div class="row g-3 mt-2">
+      <div class="col-12">
+        <div class="table-wrapper">
+          <h6 class="fw-bold mb-3"><i class="bi bi-table me-2"></i>Event Summary</h6>
+          <div id="dashEventSummary"><p class="text-muted small">No events data</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: QUICK ENTRY -->
+  <!-- ============================================================ -->
+  <div class="page-section" id="page-addentry">
+    <div class="quick-entry-card">
+      <h5 class="fw-bold mb-4"><i class="bi bi-plus-circle me-2 text-gold"></i>Quick Entry – Donation or Expense</h5>
+      <form id="quickEntryForm">
+        <!-- Type toggle -->
+        <div class="mb-3 entry-type-toggle">
+          <label class="form-label">Entry Type</label>
+          <div class="btn-group w-100" role="group">
+            <button type="button" class="btn btn-outline-secondary active" id="qeTypeDonation">Donation</button>
+            <button type="button" class="btn btn-outline-secondary" id="qeTypeExpense">Expense</button>
+          </div>
+        </div>
+
+        <!-- Common fields -->
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Event *</label>
+            <select class="form-select" id="qeEvent" required>
+              <option value="Janmashtami">Janmashtami</option>
+              <option value="Ganesh Utsav ">Ganesh Utsav </option>
+              <option value="Navratri">Navratri</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Amount *</label>
+            <input type="number" class="form-control" id="qeAmount" required min="1" placeholder="0" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Payment Mode *</label>
+            <select class="form-select" id="qePayment" required>
+              <option value="Cash">Cash</option>
+              <option value="UPI">UPI</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-control" id="qeDate" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Remark</label>
+            <input type="text" class="form-control" id="qeRemark" placeholder="Optional note" />
+          </div>
+        </div>
+
+        <!-- Donation‑specific fields -->
+        <div id="qeDonationFields" class="row g-3 mt-2">
+          <div class="col-md-6">
+            <label class="form-label">Donor Name *</label>
+            <input type="text" class="form-control" id="qeDonorName" placeholder="Donor name" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Mobile</label>
+            <input type="text" class="form-control" id="qeMobile" placeholder="Mobile number" />
+          </div>
+        </div>
+
+        <!-- Expense‑specific fields (hidden by default) -->
+        <div id="qeExpenseFields" class="row g-3 mt-2" style="display:none;">
+          <div class="col-md-6">
+            <label class="form-label">Expense Item *</label>
+            <input type="text" class="form-control" id="qeItem" placeholder="Item name" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Category *</label>
+            <select class="form-select" id="qeCategory">
+              <option value="Decoration">Decoration</option>
+              <option value="Food">Food</option>
+              <option value="Sound System">Sound System</option>
+              <option value="Lighting">Lighting</option>
+              <option value="Transport">Transport</option>
+              <option value="Printing">Printing</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-3">
+          <button type="button" class="btn btn-gold px-5" id="qeSaveBtn"><i class="bi bi-check-lg"></i> Save Entry</button>
+          <button type="reset" class="btn btn-outline-secondary">Clear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: DONATIONS -->
+  <!-- ============================================================ -->
+  <div class="page-section" id="page-donations">
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <button class="btn btn-gold" id="donationAddBtn"><i class="bi bi-plus-lg"></i> Add Donation</button>
+        <input type="text" class="form-control" style="max-width:200px;" id="donationSearch" placeholder="Search donation..." />
+        <select class="form-select" style="max-width:150px;" id="donationFilterEvent">
+          <option value="all">All Events</option>
+          <option value="Janmashtami">Janmashtami</option>
+          <option value="Ganesh Utsav ">Ganesh Utsav </option>
+          <option value="Navratri">Navratri</option>
+        </select>
+        <select class="form-select" style="max-width:150px;" id="donationFilterPayment">
+          <option value="all">All Payments</option>
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="date" class="form-control" style="max-width:140px;" id="donationDateFrom" />
+        <input type="date" class="form-control" style="max-width:140px;" id="donationDateTo" />
+        <button class="btn btn-outline-gold" id="donationResetFilters"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="donationTable">
+          <thead><tr>
+            <th data-sort="donorName">Donor <i class="bi bi-arrow-up"></i></th>
+            <th data-sort="mobile">Mobile</th>
+            <th data-sort="event">Event</th>
+            <th data-sort="amount" class="text-end">Amount</th>
+            <th data-sort="paymentMode">Payment</th>
+            <th data-sort="date">Date</th>
+            <th class="text-center">Actions</th>
+          </tr></thead>
+          <tbody id="donationTableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination-wrap" id="donationPagination"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: EXPENSES -->
+  <!-- ============================================================ -->
+  <div class="page-section" id="page-expenses">
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <button class="btn btn-gold" id="expenseAddBtn"><i class="bi bi-plus-lg"></i> Add Expense</button>
+        <input type="text" class="form-control" style="max-width:200px;" id="expenseSearch" placeholder="Search expense..." />
+        <select class="form-select" style="max-width:140px;" id="expenseFilterEvent">
+          <option value="all">All Events</option>
+          <option value="Janmashtami">Janmashtami</option>
+          <option value="Ganesh Utsav ">Ganesh Utsav </option>
+          <option value="Navratri">Navratri</option>
+        </select>
+        <select class="form-select" style="max-width:140px;" id="expenseFilterCategory">
+          <option value="all">All Categories</option>
+          <option value="Decoration">Decoration</option>
+          <option value="Food">Food</option>
+          <option value="Sound System">Sound System</option>
+          <option value="Lighting">Lighting</option>
+          <option value="Transport">Transport</option>
+          <option value="Printing">Printing</option>
+          <option value="Other">Other</option>
+        </select>
+        <select class="form-select" style="max-width:140px;" id="expenseFilterPayment">
+          <option value="all">All Payments</option>
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="date" class="form-control" style="max-width:130px;" id="expenseDateFrom" />
+        <input type="date" class="form-control" style="max-width:130px;" id="expenseDateTo" />
+        <button class="btn btn-outline-gold" id="expenseResetFilters"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="expenseTable">
+          <thead><tr>
+            <th data-sort="item">Item <i class="bi bi-arrow-up"></i></th>
+            <th data-sort="category">Category</th>
+            <th data-sort="event">Event</th>
+            <th data-sort="amount" class="text-end">Amount</th>
+            <th data-sort="paymentMode">Payment</th>
+            <th data-sort="date">Date</th>
+            <th class="text-center">Actions</th>
+          </tr></thead>
+          <tbody id="expenseTableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination-wrap" id="expensePagination"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: PROFIT & LOSS -->
+  <!-- ============================================================ -->
+  <div class="page-section" id="page-profitloss">
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <input type="text" class="form-control" style="max-width:200px;" id="plSearch" placeholder="Search event..." />
+        <select class="form-select" style="max-width:150px;" id="plFilterEvent">
+          <option value="all">All Events</option>
+          <option value="Janmashtami">Janmashtami</option>
+          <option value="Ganesh Utsav ">Ganesh Utsav </option>
+          <option value="Navratri">Navratri</option>
+        </select>
+        <input type="date" class="form-control" style="max-width:140px;" id="plDateFrom" />
+        <input type="date" class="form-control" style="max-width:140px;" id="plDateTo" />
+        <button class="btn btn-outline-gold" id="plResetFilters"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="plTable">
+          <thead><tr>
+            <th data-sort="event">Event <i class="bi bi-arrow-up"></i></th>
+            <th class="text-end">Income</th>
+            <th class="text-end">Expense</th>
+            <th class="text-end">Profit / Loss</th>
+            <th class="text-end">Margin</th>
+            <th class="text-center">Status</th>
+          </tr></thead>
+          <tbody id="plTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: EVENT REPORT -->
+  <!-- ============================================================ -->
+  <div class="page-section" id="page-eventreport">
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <input type="text" class="form-control" style="max-width:200px;" id="erSearch" placeholder="Search event..." />
+        <select class="form-select" style="max-width:150px;" id="erFilterEvent">
+          <option value="all">All Events</option>
+          <option value="Janmashtami">Janmashtami</option>
+          <option value="Ganesh Utsav ">Ganesh Utsav </option>
+          <option value="Navratri">Navratri</option>
+        </select>
+        <input type="date" class="form-control" style="max-width:140px;" id="erDateFrom" />
+        <input type="date" class="form-control" style="max-width:140px;" id="erDateTo" />
+        <button class="btn btn-outline-gold" id="erResetFilters"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="erTable">
+          <thead><tr>
+            <th data-sort="event">Event <i class="bi bi-arrow-up"></i></th>
+            <th class="text-end">Total Donation</th>
+            <th class="text-end">Total Expense</th>
+            <th class="text-end">Balance</th>
+            <th class="text-end">Total Donors</th>
+            <th class="text-end">Avg Donation</th>
+          </tr></thead>
+          <tbody id="erTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: USERS -->
+  <!-- ============================================================ -->
+  <div class="page-section" id="page-users">
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <button class="btn btn-gold" id="userAddBtn"><i class="bi bi-plus-lg"></i> Add User</button>
+        <input type="text" class="form-control" style="max-width:200px;" id="userSearch" placeholder="Search user..." />
+        <select class="form-select" style="max-width:140px;" id="userFilterRole">
+          <option value="all">All Roles</option>
+          <option value="Admin">Admin</option>
+          <option value="Manager">Manager</option>
+          <option value="User">User</option>
+        </select>
+        <select class="form-select" style="max-width:140px;" id="userFilterStatus">
+          <option value="all">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <button class="btn btn-outline-gold" id="userResetFilters"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="userTable">
+          <thead><tr>
+            <th data-sort="name">Name <i class="bi bi-arrow-up"></i></th>
+            <th data-sort="email">Email</th>
+            <th data-sort="role">Role</th>
+            <th data-sort="status">Status</th>
+            <th data-sort="createdAt">Created</th>
+            <th class="text-center">Actions</th>
+          </tr></thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination-wrap" id="userPagination"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: ACTIVITY LOG -->
+  <!-- ============================================================ -->
+  <div class="page-section" id="page-activitylog">
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <input type="text" class="form-control" style="max-width:200px;" id="activitySearch" placeholder="Search activity..." />
+        <select class="form-select" style="max-width:140px;" id="activityFilterUser">
+          <option value="all">All Users</option>
+        </select>
+        <select class="form-select" style="max-width:130px;" id="activityFilterAction">
+          <option value="all">All Actions</option>
+          <option value="Add">Add</option>
+          <option value="Update">Update</option>
+          <option value="Delete">Delete</option>
+          <option value="Login">Login</option>
+        </select>
+        <select class="form-select" style="max-width:140px;" id="activityFilterModule">
+          <option value="all">All Modules</option>
+          <option value="Donation">Donation</option>
+          <option value="Expense">Expense</option>
+          <option value="User">User</option>
+          <option value="Settings">Settings</option>
+        </select>
+        <input type="date" class="form-control" style="max-width:130px;" id="activityDateFrom" />
+        <input type="date" class="form-control" style="max-width:130px;" id="activityDateTo" />
+        <button class="btn btn-outline-gold" id="activityResetFilters"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="activityTable">
+          <thead><tr>
+            <th data-sort="dateTime">Date &amp; Time <i class="bi bi-arrow-up"></i></th>
+            <th data-sort="user">User</th>
+            <th data-sort="action">Action</th>
+            <th data-sort="module">Module</th>
+            <th data-sort="description">Description</th>
+          </tr></thead>
+          <tbody id="activityTableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination-wrap" id="activityPagination"></div>
+    </div>
+  </div>
+
+</div><!-- /main-content -->
+
+<!-- ============ TOAST CONTAINER ============ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ============ MODALS ============ -->
+
+<!-- Donation Modal -->
+<div class="modal fade" id="donationModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="donationModalTitle">Add Donation</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <form id="donationForm">
+          <input type="hidden" id="donationFormId" />
+          <div class="row g-3">
+            <div class="col-12"><label class="form-label">Donor Name *</label><input type="text" class="form-control" id="donationFormName" required /></div>
+            <div class="col-12"><label class="form-label">Mobile</label><input type="text" class="form-control" id="donationFormMobile" /></div>
+            <div class="col-6"><label class="form-label">Event *</label><select class="form-select" id="donationFormEvent" required><option value="Janmashtami">Janmashtami</option><option value="Ganesh Utsav ">Ganesh Utsav </option><option value="Navratri">Navratri</option></select></div>
+            <div class="col-6"><label class="form-label">Amount *</label><input type="number" class="form-control" id="donationFormAmount" required min="1" /></div>
+            <div class="col-6"><label class="form-label">Payment Mode *</label><select class="form-select" id="donationFormPayment" required><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Bank Transfer">Bank Transfer</option><option value="Other">Other</option></select></div>
+            <div class="col-6"><label class="form-label">Date *</label><input type="date" class="form-control" id="donationFormDate" required /></div>
+            <div class="col-12"><label class="form-label">Remark</label><input type="text" class="form-control" id="donationFormRemark" /></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-gold" id="donationFormSave"><i class="bi bi-check-lg"></i> Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal fade" id="expenseModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="expenseModalTitle">Add Expense</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <form id="expenseForm">
+          <input type="hidden" id="expenseFormId" />
+          <div class="row g-3">
+            <div class="col-12"><label class="form-label">Expense Item *</label><input type="text" class="form-control" id="expenseFormItem" required /></div>
+            <div class="col-6"><label class="form-label">Category *</label><select class="form-select" id="expenseFormCategory" required><option value="Decoration">Decoration</option><option value="Food">Food</option><option value="Sound System">Sound System</option><option value="Lighting">Lighting</option><option value="Transport">Transport</option><option value="Printing">Printing</option><option value="Other">Other</option></select></div>
+            <div class="col-6"><label class="form-label">Event *</label><select class="form-select" id="expenseFormEvent" required><option value="Janmashtami">Janmashtami</option><option value="Ganesh Utsav ">Ganesh Utsav </option><option value="Navratri">Navratri</option></select></div>
+            <div class="col-6"><label class="form-label">Amount *</label><input type="number" class="form-control" id="expenseFormAmount" required min="1" /></div>
+            <div class="col-6"><label class="form-label">Payment Mode *</label><select class="form-select" id="expenseFormPayment" required><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Bank Transfer">Bank Transfer</option><option value="Other">Other</option></select></div>
+            <div class="col-6"><label class="form-label">Date *</label><input type="date" class="form-control" id="expenseFormDate" required /></div>
+            <div class="col-6"><label class="form-label">Remark</label><input type="text" class="form-control" id="expenseFormRemark" /></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-gold" id="expenseFormSave"><i class="bi bi-check-lg"></i> Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="userModalTitle">Add User</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <form id="userForm">
+          <input type="hidden" id="userFormId" />
+          <div class="row g-3">
+            <div class="col-12"><label class="form-label">Name *</label><input type="text" class="form-control" id="userFormName" required /></div>
+            <div class="col-12"><label class="form-label">Email *</label><input type="email" class="form-control" id="userFormEmail" required /></div>
+            <div class="col-6"><label class="form-label">Role *</label><select class="form-select" id="userFormRole" required><option value="Admin">Admin</option><option value="Manager">Manager</option><option value="User">User</option></select></div>
+            <div class="col-6"><label class="form-label">Status *</label><select class="form-select" id="userFormStatus" required><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+            <div class="col-12" id="userPasswordWrap"><label class="form-label">Password *</label><input type="password" class="form-control" id="userFormPassword" required minlength="4" /></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-gold" id="userFormSave"><i class="bi bi-check-lg"></i> Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Delete</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="deleteModalBody">Are you sure you want to delete this record?</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" id="deleteConfirmBtn"><i class="bi bi-trash"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BOOTSTRAP JS ============ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+</script>
+
+<!-- ============ APPLICATION SCRIPT ============ -->
+<script>
+  (function() {
+    'use strict';
+
+    // ================================================================
+    //  DATA LAYER
+    // ================================================================
+    const DB = {
+      get(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } },
+      set(key, data) { localStorage.setItem(key, JSON.stringify(data)); },
+      get donations() { return this.get('utsav_donations'); },
+      set donations(v) { this.set('utsav_donations', v); },
+      get expenses() { return this.get('utsav_expenses'); },
+      set expenses(v) { this.set('utsav_expenses', v); },
+      get users() { return this.get('utsav_users'); },
+      set users(v) { this.set('utsav_users', v); },
+      get activityLogs() { return this.get('utsav_activityLogs'); },
+      set activityLogs(v) { this.set('utsav_activityLogs', v); },
+      seed() {
+        let users = this.users;
+        if (users.length === 0) {
+          users = [{
+            id: 'u1',
+            name: 'Admin',
+            email: 'admin@utsav.com',
+            role: 'Admin',
+            status: 'Active',
+            password: 'admin123',
+            createdAt: new Date().toISOString()
+          }];
+          this.users = users;
+          this.activityLogs = [];
+        }
+      }
+    };
+    DB.seed();
+
+    // ================================================================
+    //  HELPERS
+    // ================================================================
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const today = () => new Date().toISOString().slice(0, 10);
+    const now = () => new Date().toISOString();
+    const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+    const formatCurrency = (n) => '₹' + Number(n).toLocaleString('en-IN');
+    const formatDateTime = (d) => d ? new Date(d).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+
+    function getEventList() { return ['Janmashtami', 'Ganesh Utsav ', 'Navratri']; }
+    function getCategoryList() { return ['Decoration', 'Food', 'Sound System', 'Lighting', 'Transport', 'Printing', 'Other']; }
+    function getPaymentModes() { return ['Cash', 'UPI', 'Bank Transfer', 'Other']; }
+    function getRoles() { return ['Admin', 'Manager', 'User']; }
+    function getStatuses() { return ['Active', 'Inactive']; }
+
+    // ================================================================
+    //  ACTIVITY LOG
+    // ================================================================
+    function logActivity(user, action, module, recordId, description) {
+      const logs = DB.activityLogs;
+      logs.unshift({
+        id: uid(),
+        user: user || 'System',
+        action: action || 'Add',
+        module: module || 'Settings',
+        recordId: recordId || '',
+        description: description || `${action} ${module}`,
+        dateTime: now()
+      });
+      DB.activityLogs = logs;
+    }
+
+    // ================================================================
+    //  TOAST
+    // ================================================================
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const colors = { success: '#10b981', danger: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+      const icon = { success: 'bi-check-circle-fill', danger: 'bi-x-circle-fill', warning: 'bi-exclamation-triangle-fill', info: 'bi-info-circle-fill' };
+      const el = document.createElement('div');
+      el.className = 'toast align-items-center show';
+      el.setAttribute('role', 'alert');
+      el.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body d-flex align-items-center gap-2">
+            <i class="bi ${icon[type] || icon.info}" style="color:${colors[type] || colors.info};font-size:1.3rem;"></i>
+            <span>${message}</span>
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      `;
+      el.style.borderLeft = `4px solid ${colors[type] || colors.info}`;
+      container.appendChild(el);
+      setTimeout(() => { if (el.parentNode) el.remove(); }, 4000);
+    }
+
+    // ================================================================
+    //  DELETE CONFIRMATION
+    // ================================================================
+    let deleteCallback = null;
+
+    function confirmDelete(message, callback) {
+      document.getElementById('deleteModalBody').textContent = message || 'Are you sure you want to delete this record?';
+      deleteCallback = callback;
+      const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+      modal.show();
+    }
+    document.getElementById('deleteConfirmBtn').addEventListener('click', function() {
+      if (typeof deleteCallback === 'function') { deleteCallback(); deleteCallback = null; }
+      bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+    });
+
+    // ================================================================
+    //  MODAL HELPERS
+    // ================================================================
+    function openModal(id) { new bootstrap.Modal(document.getElementById(id)).show(); }
+    function closeModal(id) { const m = bootstrap.Modal.getInstance(document.getElementById(id)); if (m) m.hide(); }
+
+    // ================================================================
+    //  SORT & PAGINATION STATE
+    // ================================================================
+    const sortState = {};
+
+    function getSortState(key) {
+      if (!sortState[key]) sortState[key] = { field: 'createdAt', dir: 'desc' };
+      return sortState[key];
+    }
+
+    function toggleSort(key, field) {
+      const s = getSortState(key);
+      if (s.field === field) { s.dir = s.dir === 'asc' ? 'desc' : 'asc'; } else { s.field = field; s.dir = 'asc'; }
+      return s;
+    }
+
+    function sortData(data, field, dir) {
+      const f = field || 'createdAt';
+      const d = dir || 'desc';
+      return [...data].sort((a, b) => {
+        let va = a[f] ?? '', vb = b[f] ?? '';
+        if (typeof va === 'string') va = va.toLowerCase();
+        if (typeof vb === 'string') vb = vb.toLowerCase();
+        if (va < vb) return d === 'asc' ? -1 : 1;
+        if (va > vb) return d === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // ================================================================
+    //  PAGINATION
+    // ================================================================
+    function renderPagination(containerId, total, page, perPage, onPage) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const totalPages = Math.ceil(total / perPage) || 1;
+      const p = Math.min(Math.max(page || 1, 1), totalPages);
+      let html = `<span class="text-muted small">${total} records, page ${p} of ${totalPages}</span><nav><ul class="pagination pagination-sm mb-0">`;
+      html += `<li class="page-item ${p<=1?'disabled':''}"><a class="page-link" href="#" data-page="${p-1}">Previous</a></li>`;
+      const start = Math.max(1, p - 2), end = Math.min(totalPages, p + 2);
+      for (let i = start; i <= end; i++) {
+        html += `<li class="page-item ${i===p?'active':''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+      }
+      html += `<li class="page-item ${p>=totalPages?'disabled':''}"><a class="page-link" href="#" data-page="${p+1}">Next</a></li>`;
+      html += '</ul></nav>';
+      container.innerHTML = html;
+      container.querySelectorAll('.page-link').forEach(el => {
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          const pg = parseInt(this.dataset.page);
+          if (pg && pg >= 1 && pg <= totalPages && typeof onPage === 'function') onPage(pg);
+        });
+      });
+    }
+
+    // ================================================================
+    //  DASHBOARD
+    // ================================================================
+    function renderDashboard() {
+      const donations = DB.donations;
+      const expenses = DB.expenses;
+      const search = document.getElementById('dashSearch').value.toLowerCase();
+      const eventFilter = document.getElementById('dashEvent').value;
+      const range = document.getElementById('dashDateRange').value;
+      let nowDate = new Date();
+      let fromDate = null, toDate = null;
+      if (range === 'today') { fromDate = toDate = today(); } else if (range === 'week') {
+        const d = new Date(); d.setDate(d.getDate() - 7); fromDate = d.toISOString().slice(0, 10); toDate = today();
+      } else if (range === 'month') {
+        const d = new Date(); d.setMonth(d.getMonth() - 1); fromDate = d.toISOString().slice(0, 10); toDate = today();
+      } else if (range === 'year') {
+        const d = new Date(); d.setFullYear(d.getFullYear() - 1); fromDate = d.toISOString().slice(0, 10); toDate = today();
+      }
+
+      let filteredDonations = donations.filter(d => {
+        if (eventFilter !== 'all' && d.event !== eventFilter) return false;
+        if (search && !d.donorName.toLowerCase().includes(search) && !d.mobile.includes(search) && !d.event.toLowerCase().includes(search) && !d.paymentMode.toLowerCase().includes(search)) return false;
+        if (fromDate && d.date < fromDate) return false;
+        if (toDate && d.date > toDate) return false;
+        return true;
+      });
+      let filteredExpenses = expenses.filter(e => {
+        if (eventFilter !== 'all' && e.event !== eventFilter) return false;
+        if (search && !e.item.toLowerCase().includes(search) && !e.category.toLowerCase().includes(search) && !e.event.toLowerCase().includes(search) && !e.paymentMode.toLowerCase().includes(search)) return false;
+        if (fromDate && e.date < fromDate) return false;
+        if (toDate && e.date > toDate) return false;
+        return true;
+      });
+
+      const totalDonation = filteredDonations.reduce((s, d) => s + Number(d.amount), 0);
+      const totalExpense = filteredExpenses.reduce((s, e) => s + Number(e.amount), 0);
+      const balance = totalDonation - totalExpense;
+      document.getElementById('dashTotalDonation').textContent = formatCurrency(totalDonation);
+      document.getElementById('dashTotalExpense').textContent = formatCurrency(totalExpense);
+      document.getElementById('dashBalance').textContent = formatCurrency(balance);
+      document.getElementById('dashProfitLoss').textContent = formatCurrency(balance);
+      document.getElementById('dashProfitLoss').style.color = balance >= 0 ? '#166534' : '#991b1b';
+
+      // recent donations
+      const recentD = [...filteredDonations].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+      let rdHtml = '';
+      if (recentD.length === 0) rdHtml = '<p class="text-muted small">No donations</p>';
+      else {
+        rdHtml = '<div class="list-group list-group-flush">';
+        recentD.forEach(d => {
+          rdHtml += `<div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0 border-bottom"><span>${d.donorName} <span class="badge bg-gold-soft text-dark">${d.event}</span></span><span class="fw-bold">${formatCurrency(d.amount)}</span></div>`;
+        });
+        rdHtml += '</div>';
+      }
+      document.getElementById('dashRecentDonations').innerHTML = rdHtml;
+
+      // recent expenses
+      const recentE = [...filteredExpenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+      let reHtml = '';
+      if (recentE.length === 0) reHtml = '<p class="text-muted small">No expenses</p>';
+      else {
+        reHtml = '<div class="list-group list-group-flush">';
+        recentE.forEach(e => {
+          reHtml += `<div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0 border-bottom"><span>${e.item} <span class="badge bg-gold-soft text-dark">${e.event}</span></span><span class="fw-bold">${formatCurrency(e.amount)}</span></div>`;
+        });
+        reHtml += '</div>';
+      }
+      document.getElementById('dashRecentExpenses').innerHTML = reHtml;
+
+      // event summary
+      const events = getEventList();
+      let esHtml = '<div class="table-responsive"><table class="table table-sm table-borderless"><thead><tr><th>Event</th><th class="text-end">Income</th><th class="text-end">Expense</th><th class="text-end">Balance</th></tr></thead><tbody>';
+      events.forEach(ev => {
+        const inc = donations.filter(d => d.event === ev).reduce((s, d) => s + Number(d.amount), 0);
+        const exp = expenses.filter(e => e.event === ev).reduce((s, e) => s + Number(e.amount), 0);
+        const bal = inc - exp;
+        esHtml += `<tr><td><strong>${ev}</strong></td><td class="text-end">${formatCurrency(inc)}</td><td class="text-end">${formatCurrency(exp)}</td><td class="text-end fw-bold" style="color:${bal>=0?'#166534':'#991b1b'}">${formatCurrency(bal)}</td></tr>`;
+      });
+      esHtml += '</tbody></table></div>';
+      document.getElementById('dashEventSummary').innerHTML = esHtml;
+    }
+
+    // ================================================================
+    //  QUICK ENTRY
+    // ================================================================
+    function initQuickEntry() {
+      const typeDonation = document.getElementById('qeTypeDonation');
+      const typeExpense = document.getElementById('qeTypeExpense');
+      const donationFields = document.getElementById('qeDonationFields');
+      const expenseFields = document.getElementById('qeExpenseFields');
+
+      function setType(type) {
+        typeDonation.classList.toggle('active', type === 'donation');
+        typeExpense.classList.toggle('active', type === 'expense');
+        donationFields.style.display = type === 'donation' ? 'flex' : 'none';
+        expenseFields.style.display = type === 'expense' ? 'flex' : 'none';
+        document.getElementById('qeDonorName').required = (type === 'donation');
+        document.getElementById('qeItem').required = (type === 'expense');
+      }
+
+      typeDonation.addEventListener('click', () => setType('donation'));
+      typeExpense.addEventListener('click', () => setType('expense'));
+      setType('donation');
+
+      document.getElementById('qeSaveBtn').addEventListener('click', function() {
+        const type = typeDonation.classList.contains('active') ? 'donation' : 'expense';
+        const event = document.getElementById('qeEvent').value;
+        const amount = parseFloat(document.getElementById('qeAmount').value);
+        const payment = document.getElementById('qePayment').value;
+        const date = document.getElementById('qeDate').value || today();
+        const remark = document.getElementById('qeRemark').value.trim();
+
+        if (!event || !amount || amount <= 0 || !payment || !date) {
+          showToast('Please fill all required fields (Event, Amount, Payment, Date)', 'warning');
+          return;
+        }
+
+        if (type === 'donation') {
+          const donorName = document.getElementById('qeDonorName').value.trim();
+          const mobile = document.getElementById('qeMobile').value.trim();
+          if (!donorName) { showToast('Donor Name is required for donation', 'warning'); return; }
+          const donations = DB.donations;
+          const newD = {
+            id: uid(),
+            donorName,
+            mobile,
+            event,
+            amount,
+            paymentMode: payment,
+            date,
+            remark,
+            addedBy: 'Admin',
+            createdAt: now(),
+            updatedAt: now()
+          };
+          donations.push(newD);
+          DB.donations = donations;
+          logActivity('System', 'Add', 'Donation', newD.id, `Added ${formatCurrency(amount)} donation for ${donorName} (${event})`);
+          showToast('Donation added successfully');
+          renderDonations();
+        } else {
+          const item = document.getElementById('qeItem').value.trim();
+          const category = document.getElementById('qeCategory').value;
+          if (!item) { showToast('Expense Item is required for expense', 'warning'); return; }
+          const expenses = DB.expenses;
+          const newE = {
+            id: uid(),
+            item,
+            category,
+            event,
+            amount,
+            paymentMode: payment,
+            date,
+            remark,
+            addedBy: 'Admin',
+            createdAt: now(),
+            updatedAt: now()
+          };
+          expenses.push(newE);
+          DB.expenses = expenses;
+          logActivity('System', 'Add', 'Expense', newE.id, `Added expense ${formatCurrency(amount)} for ${item} (${event})`);
+          showToast('Expense added successfully');
+          renderExpenses();
+        }
+        renderDashboard();
+        renderAllReports();
+        document.getElementById('quickEntryForm').reset();
+        setType('donation');
+        document.getElementById('qeDate').value = today();
+      });
+    }
+
+    // ================================================================
+    //  DONATIONS CRUD
+    // ================================================================
+    let donationPage = 1, donationPerPage = 10;
+
+    function getDonationFilters() {
+      return {
+        search: document.getElementById('donationSearch').value.toLowerCase(),
+        event: document.getElementById('donationFilterEvent').value,
+        payment: document.getElementById('donationFilterPayment').value,
+        dateFrom: document.getElementById('donationDateFrom').value,
+        dateTo: document.getElementById('donationDateTo').value,
+      };
+    }
+
+    function filterDonations(data, filters) {
+      return data.filter(d => {
+        if (filters.search && !d.donorName.toLowerCase().includes(filters.search) && !d.mobile.includes(filters.search) && !d.event.toLowerCase().includes(filters.search) && !d.paymentMode.toLowerCase().includes(filters.search)) return false;
+        if (filters.event !== 'all' && d.event !== filters.event) return false;
+        if (filters.payment !== 'all' && d.paymentMode !== filters.payment) return false;
+        if (filters.dateFrom && d.date < filters.dateFrom) return false;
+        if (filters.dateTo && d.date > filters.dateTo) return false;
+        return true;
+      });
+    }
+
+    function renderDonations() {
+      const filters = getDonationFilters();
+      const all = DB.donations;
+      const filtered = filterDonations(all, filters);
+      const s = getSortState('donation');
+      const sorted = sortData(filtered, s.field, s.dir);
+      const total = sorted.length;
+      const perPage = donationPerPage;
+      const page = Math.min(donationPage, Math.ceil(total / perPage) || 1);
+      donationPage = page;
+      const start = (page - 1) * perPage;
+      const end = Math.min(start + perPage, total);
+      const pageData = sorted.slice(start, end);
+
+      const tbody = document.getElementById('donationTableBody');
+      if (pageData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="bi bi-inbox"></i>No donations found</div></td></tr>`;
+      } else {
+        tbody.innerHTML = pageData.map(d => `
+          <tr>
+            <td><strong>${d.donorName}</strong></td>
+            <td>${d.mobile || '-'}</td>
+            <td><span class="event-badge">${d.event}</span></td>
+            <td class="text-end fw-bold">${formatCurrency(d.amount)}</td>
+            <td><span class="badge bg-secondary bg-opacity-10 text-dark">${d.paymentMode}</span></td>
+            <td>${formatDate(d.date)}</td>
+            <td class="text-center">
+              <div class="action-btns d-flex justify-content-center gap-1">
+                <button class="btn btn-outline-primary btn-sm donation-view" data-id="${d.id}"><i class="bi bi-eye"></i></button>
+                <button class="btn btn-outline-warning btn-sm donation-edit" data-id="${d.id}"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-outline-danger btn-sm donation-delete" data-id="${d.id}"><i class="bi bi-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+      tbody.querySelectorAll('.donation-view').forEach(el => { el.addEventListener('click', function() { viewDonation(this.dataset.id); }); });
+      tbody.querySelectorAll('.donation-edit').forEach(el => { el.addEventListener('click', function() { editDonation(this.dataset.id); }); });
+      tbody.querySelectorAll('.donation-delete').forEach(el => { el.addEventListener('click', function() { deleteDonation(this.dataset.id); }); });
+
+      renderPagination('donationPagination', total, page, perPage, (p) => { donationPage = p; renderDonations(); });
+      updateSortIndicators('donationTable', 'donation');
+    }
+
+    function viewDonation(id) {
+      const d = DB.donations.find(r => r.id === id);
+      if (!d) return;
+      alert(`Donation Details:\n\nDonor: ${d.donorName}\nMobile: ${d.mobile || '-'}\nEvent: ${d.event}\nAmount: ${formatCurrency(d.amount)}\nPayment: ${d.paymentMode}\nDate: ${formatDate(d.date)}\nRemark: ${d.remark || '-'}\nAdded By: ${d.addedBy || 'System'}`);
+    }
+
+    function editDonation(id) {
+      const d = DB.donations.find(r => r.id === id);
+      if (!d) return;
+      document.getElementById('donationFormId').value = d.id;
+      document.getElementById('donationFormName').value = d.donorName;
+      document.getElementById('donationFormMobile').value = d.mobile || '';
+      document.getElementById('donationFormEvent').value = d.event;
+      document.getElementById('donationFormAmount').value = d.amount;
+      document.getElementById('donationFormPayment').value = d.paymentMode;
+      document.getElementById('donationFormDate').value = d.date;
+      document.getElementById('donationFormRemark').value = d.remark || '';
+      document.getElementById('donationModalTitle').textContent = 'Edit Donation';
+      openModal('donationModal');
+    }
+
+    function deleteDonation(id) {
+      confirmDelete('Are you sure you want to delete this donation?', function() {
+        let donations = DB.donations;
+        const d = donations.find(r => r.id === id);
+        donations = donations.filter(r => r.id !== id);
+        DB.donations = donations;
+        logActivity('System', 'Delete', 'Donation', id, `Deleted donation of ${formatCurrency(d?.amount || 0)} from ${d?.donorName || ''}`);
+        renderDonations();
+        renderDashboard();
+        renderAllReports();
+        showToast('Donation deleted successfully', 'danger');
+      });
+    }
+
+    function saveDonation() {
+      const id = document.getElementById('donationFormId').value;
+      const data = {
+        donorName: document.getElementById('donationFormName').value.trim(),
+        mobile: document.getElementById('donationFormMobile').value.trim(),
+        event: document.getElementById('donationFormEvent').value,
+        amount: parseFloat(document.getElementById('donationFormAmount').value) || 0,
+        paymentMode: document.getElementById('donationFormPayment').value,
+        date: document.getElementById('donationFormDate').value || today(),
+        remark: document.getElementById('donationFormRemark').value.trim(),
+        addedBy: 'Admin',
+      };
+      if (!data.donorName || data.amount <= 0) { showToast('Please fill required fields', 'warning'); return; }
+      let donations = DB.donations;
+      if (id) {
+        const idx = donations.findIndex(r => r.id === id);
+        if (idx > -1) {
+          donations[idx] = { ...donations[idx], ...data, updatedAt: now() };
+          DB.donations = donations;
+          logActivity('System', 'Update', 'Donation', id, `Updated donation for ${data.donorName} (${formatCurrency(data.amount)})`);
+          showToast('Donation updated successfully');
+        }
+      } else {
+        const newD = { ...data, id: uid(), createdAt: now(), updatedAt: now() };
+        donations.push(newD);
+        DB.donations = donations;
+        logActivity('System', 'Add', 'Donation', newD.id, `Added ${formatCurrency(data.amount)} donation for ${data.donorName} (${data.event})`);
+        showToast('Donation added successfully');
+      }
+      closeModal('donationModal');
+      document.getElementById('donationForm').reset();
+      document.getElementById('donationFormId').value = '';
+      renderDonations();
+      renderDashboard();
+      renderAllReports();
+    }
+
+    // ================================================================
+    //  EXPENSES CRUD
+    // ================================================================
+    let expensePage = 1, expensePerPage = 10;
+
+    function getExpenseFilters() {
+      return {
+        search: document.getElementById('expenseSearch').value.toLowerCase(),
+        event: document.getElementById('expenseFilterEvent').value,
+        category: document.getElementById('expenseFilterCategory').value,
+        payment: document.getElementById('expenseFilterPayment').value,
+        dateFrom: document.getElementById('expenseDateFrom').value,
+        dateTo: document.getElementById('expenseDateTo').value,
+      };
+    }
+
+    function filterExpenses(data, filters) {
+      return data.filter(e => {
+        if (filters.search && !e.item.toLowerCase().includes(filters.search) && !e.category.toLowerCase().includes(filters.search) && !e.event.toLowerCase().includes(filters.search) && !e.paymentMode.toLowerCase().includes(filters.search)) return false;
+        if (filters.event !== 'all' && e.event !== filters.event) return false;
+        if (filters.category !== 'all' && e.category !== filters.category) return false;
+        if (filters.payment !== 'all' && e.paymentMode !== filters.payment) return false;
+        if (filters.dateFrom && e.date < filters.dateFrom) return false;
+        if (filters.dateTo && e.date > filters.dateTo) return false;
+        return true;
+      });
+    }
+
+    function renderExpenses() {
+      const filters = getExpenseFilters();
+      const all = DB.expenses;
+      const filtered = filterExpenses(all, filters);
+      const s = getSortState('expense');
+      const sorted = sortData(filtered, s.field, s.dir);
+      const total = sorted.length;
+      const perPage = expensePerPage;
+      const page = Math.min(expensePage, Math.ceil(total / perPage) || 1);
+      expensePage = page;
+      const start = (page - 1) * perPage;
+      const end = Math.min(start + perPage, total);
+      const pageData = sorted.slice(start, end);
+
+      const tbody = document.getElementById('expenseTableBody');
+      if (pageData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="bi bi-inbox"></i>No expenses found</div></td></tr>`;
+      } else {
+        tbody.innerHTML = pageData.map(e => `
+          <tr>
+            <td><strong>${e.item}</strong></td>
+            <td><span class="badge bg-info bg-opacity-10 text-dark">${e.category}</span></td>
+            <td><span class="event-badge">${e.event}</span></td>
+            <td class="text-end fw-bold">${formatCurrency(e.amount)}</td>
+            <td><span class="badge bg-secondary bg-opacity-10 text-dark">${e.paymentMode}</span></td>
+            <td>${formatDate(e.date)}</td>
+            <td class="text-center">
+              <div class="action-btns d-flex justify-content-center gap-1">
+                <button class="btn btn-outline-primary btn-sm expense-view" data-id="${e.id}"><i class="bi bi-eye"></i></button>
+                <button class="btn btn-outline-warning btn-sm expense-edit" data-id="${e.id}"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-outline-danger btn-sm expense-delete" data-id="${e.id}"><i class="bi bi-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+      tbody.querySelectorAll('.expense-view').forEach(el => { el.addEventListener('click', function() { viewExpense(this.dataset.id); }); });
+      tbody.querySelectorAll('.expense-edit').forEach(el => { el.addEventListener('click', function() { editExpense(this.dataset.id); }); });
+      tbody.querySelectorAll('.expense-delete').forEach(el => { el.addEventListener('click', function() { deleteExpense(this.dataset.id); }); });
+
+      renderPagination('expensePagination', total, page, perPage, (p) => { expensePage = p; renderExpenses(); });
+      updateSortIndicators('expenseTable', 'expense');
+    }
+
+    function viewExpense(id) {
+      const e = DB.expenses.find(r => r.id === id);
+      if (!e) return;
+      alert(`Expense Details:\n\nItem: ${e.item}\nCategory: ${e.category}\nEvent: ${e.event}\nAmount: ${formatCurrency(e.amount)}\nPayment: ${e.paymentMode}\nDate: ${formatDate(e.date)}\nRemark: ${e.remark || '-'}\nAdded By: ${e.addedBy || 'System'}`);
+    }
+
+    function editExpense(id) {
+      const e = DB.expenses.find(r => r.id === id);
+      if (!e) return;
+      document.getElementById('expenseFormId').value = e.id;
+      document.getElementById('expenseFormItem').value = e.item;
+      document.getElementById('expenseFormCategory').value = e.category;
+      document.getElementById('expenseFormEvent').value = e.event;
+      document.getElementById('expenseFormAmount').value = e.amount;
+      document.getElementById('expenseFormPayment').value = e.paymentMode;
+      document.getElementById('expenseFormDate').value = e.date;
+      document.getElementById('expenseFormRemark').value = e.remark || '';
+      document.getElementById('expenseModalTitle').textContent = 'Edit Expense';
+      openModal('expenseModal');
+    }
+
+    function deleteExpense(id) {
+      confirmDelete('Are you sure you want to delete this expense?', function() {
+        let expenses = DB.expenses;
+        const e = expenses.find(r => r.id === id);
+        expenses = expenses.filter(r => r.id !== id);
+        DB.expenses = expenses;
+        logActivity('System', 'Delete', 'Expense', id, `Deleted expense of ${formatCurrency(e?.amount || 0)} for ${e?.item || ''}`);
+        renderExpenses();
+        renderDashboard();
+        renderAllReports();
+        showToast('Expense deleted successfully', 'danger');
+      });
+    }
+
+    function saveExpense() {
+      const id = document.getElementById('expenseFormId').value;
+      const data = {
+        item: document.getElementById('expenseFormItem').value.trim(),
+        category: document.getElementById('expenseFormCategory').value,
+        event: document.getElementById('expenseFormEvent').value,
+        amount: parseFloat(document.getElementById('expenseFormAmount').value) || 0,
+        paymentMode: document.getElementById('expenseFormPayment').value,
+        date: document.getElementById('expenseFormDate').value || today(),
+        remark: document.getElementById('expenseFormRemark').value.trim(),
+        addedBy: 'Admin',
+      };
+      if (!data.item || data.amount <= 0) { showToast('Please fill required fields', 'warning'); return; }
+      let expenses = DB.expenses;
+      if (id) {
+        const idx = expenses.findIndex(r => r.id === id);
+        if (idx > -1) {
+          expenses[idx] = { ...expenses[idx], ...data, updatedAt: now() };
+          DB.expenses = expenses;
+          logActivity('System', 'Update', 'Expense', id, `Updated expense ${data.item} (${formatCurrency(data.amount)})`);
+          showToast('Expense updated successfully');
+        }
+      } else {
+        const newE = { ...data, id: uid(), createdAt: now(), updatedAt: now() };
+        expenses.push(newE);
+        DB.expenses = expenses;
+        logActivity('System', 'Add', 'Expense', newE.id, `Added expense ${formatCurrency(data.amount)} for ${data.item} (${data.event})`);
+        showToast('Expense added successfully');
+      }
+      closeModal('expenseModal');
+      document.getElementById('expenseForm').reset();
+      document.getElementById('expenseFormId').value = '';
+      renderExpenses();
+      renderDashboard();
+      renderAllReports();
+    }
+
+    // ================================================================
+    //  PROFIT & LOSS
+    // ================================================================
+    function renderProfitLoss() {
+      const search = document.getElementById('plSearch').value.toLowerCase();
+      const eventFilter = document.getElementById('plFilterEvent').value;
+      const dateFrom = document.getElementById('plDateFrom').value;
+      const dateTo = document.getElementById('plDateTo').value;
+
+      const donations = DB.donations;
+      const expenses = DB.expenses;
+      const events = getEventList();
+
+      let rows = [];
+      events.forEach(ev => {
+        if (eventFilter !== 'all' && ev !== eventFilter) return;
+        if (search && !ev.toLowerCase().includes(search)) return;
+        const inc = donations.filter(d => d.event === ev).reduce((s, d) => s + Number(d.amount), 0);
+        const exp = expenses.filter(e => e.event === ev).reduce((s, e) => s + Number(e.amount), 0);
+        const pl = inc - exp;
+        const margin = inc > 0 ? (pl / inc) * 100 : 0;
+        rows.push({ event: ev, income: inc, expense: exp, profitLoss: pl, margin: margin });
+      });
+
+      if (dateFrom || dateTo) {
+        rows = rows.map(r => {
+          const inc = donations.filter(d => d.event === r.event && (!dateFrom || d.date >= dateFrom) && (!dateTo || d.date <= dateTo)).reduce((s, d) => s + Number(d.amount), 0);
+          const exp = expenses.filter(e => e.event === r.event && (!dateFrom || e.date >= dateFrom) && (!dateTo || e.date <= dateTo)).reduce((s, e) => s + Number(e.amount), 0);
+          const pl = inc - exp;
+          const margin = inc > 0 ? (pl / inc) * 100 : 0;
+          return { ...r, income: inc, expense: exp, profitLoss: pl, margin: margin };
+        });
+      }
+
+      const s = getSortState('pl');
+      rows = sortData(rows, s.field, s.dir);
+
+      const tbody = document.getElementById('plTableBody');
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="bi bi-inbox"></i>No data found</div></td></tr>`;
+      } else {
+        tbody.innerHTML = rows.map(r => {
+          const status = r.profitLoss >= 0 ? 'Profit' : 'Loss';
+          const badgeClass = r.profitLoss >= 0 ? 'status-profit' : 'status-loss';
+          return `<tr>
+            <td><strong>${r.event}</strong></td>
+            <td class="text-end">${formatCurrency(r.income)}</td>
+            <td class="text-end">${formatCurrency(r.expense)}</td>
+            <td class="text-end fw-bold" style="color:${r.profitLoss>=0?'#166534':'#991b1b'}">${formatCurrency(r.profitLoss)}</td>
+            <td class="text-end">${r.margin.toFixed(1)}%</td>
+            <td class="text-center"><span class="badge ${badgeClass}">${status}</span></td>
+          </tr>`;
+        }).join('');
+      }
+      updateSortIndicators('plTable', 'pl');
+    }
+
+    // ================================================================
+    //  EVENT REPORT
+    // ================================================================
+    function renderEventReport() {
+      const search = document.getElementById('erSearch').value.toLowerCase();
+      const eventFilter = document.getElementById('erFilterEvent').value;
+      const dateFrom = document.getElementById('erDateFrom').value;
+      const dateTo = document.getElementById('erDateTo').value;
+
+      const donations = DB.donations;
+      const expenses = DB.expenses;
+      const events = getEventList();
+
+      let rows = [];
+      events.forEach(ev => {
+        if (eventFilter !== 'all' && ev !== eventFilter) return;
+        if (search && !ev.toLowerCase().includes(search)) return;
+        const inc = donations.filter(d => d.event === ev && (!dateFrom || d.date >= dateFrom) && (!dateTo || d.date <= dateTo)).reduce((s, d) => s + Number(d.amount), 0);
+        const exp = expenses.filter(e => e.event === ev && (!dateFrom || e.date >= dateFrom) && (!dateTo || e.date <= dateTo)).reduce((s, e) => s + Number(e.amount), 0);
+        const donors = donations.filter(d => d.event === ev && (!dateFrom || d.date >= dateFrom) && (!dateTo || d.date <= dateTo));
+        const avg = donors.length > 0 ? inc / donors.length : 0;
+        rows.push({ event: ev, income: inc, expense: exp, balance: inc - exp, donors: donors.length, avg: avg });
+      });
+
+      const s = getSortState('er');
+      rows = sortData(rows, s.field, s.dir);
+
+      const tbody = document.getElementById('erTableBody');
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="bi bi-inbox"></i>No data found</div></td></tr>`;
+      } else {
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td><strong>${r.event}</strong></td>
+            <td class="text-end">${formatCurrency(r.income)}</td>
+            <td class="text-end">${formatCurrency(r.expense)}</td>
+            <td class="text-end fw-bold" style="color:${r.balance>=0?'#166534':'#991b1b'}">${formatCurrency(r.balance)}</td>
+            <td class="text-end">${r.donors}</td>
+            <td class="text-end">${formatCurrency(r.avg)}</td>
+          </tr>
+        `).join('');
+      }
+      updateSortIndicators('erTable', 'er');
+    }
+
+    // ================================================================
+    //  USERS CRUD
+    // ================================================================
+    let userPage = 1, userPerPage = 10;
+
+    function getUsersFilters() {
+      return {
+        search: document.getElementById('userSearch').value.toLowerCase(),
+        role: document.getElementById('userFilterRole').value,
+        status: document.getElementById('userFilterStatus').value,
+      };
+    }
+
+    function filterUsers(data, filters) {
+      return data.filter(u => {
+        if (filters.search && !u.name.toLowerCase().includes(filters.search) && !u.email.toLowerCase().includes(filters.search) && !u.role.toLowerCase().includes(filters.search)) return false;
+        if (filters.role !== 'all' && u.role !== filters.role) return false;
+        if (filters.status !== 'all' && u.status !== filters.status) return false;
+        return true;
+      });
+    }
+
+    function renderUsers() {
+      const filters = getUsersFilters();
+      const all = DB.users;
+      const filtered = filterUsers(all, filters);
+      const s = getSortState('user');
+      const sorted = sortData(filtered, s.field, s.dir);
+      const total = sorted.length;
+      const perPage = userPerPage;
+      const page = Math.min(userPage, Math.ceil(total / perPage) || 1);
+      userPage = page;
+      const start = (page - 1) * perPage;
+      const end = Math.min(start + perPage, total);
+      const pageData = sorted.slice(start, end);
+
+      const tbody = document.getElementById('userTableBody');
+      if (pageData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="bi bi-inbox"></i>No users found</div></td></tr>`;
+      } else {
+        tbody.innerHTML = pageData.map(u => `
+          <tr>
+            <td><strong>${u.name}</strong></td>
+            <td>${u.email}</td>
+            <td><span class="badge bg-primary bg-opacity-10 text-primary">${u.role}</span></td>
+            <td><span class="badge ${u.status==='Active'?'bg-success bg-opacity-10 text-success':'bg-danger bg-opacity-10 text-danger'}">${u.status}</span></td>
+            <td>${formatDate(u.createdAt)}</td>
+            <td class="text-center">
+              <div class="action-btns d-flex justify-content-center gap-1">
+                <button class="btn btn-outline-primary btn-sm user-view" data-id="${u.id}"><i class="bi bi-eye"></i></button>
+                <button class="btn btn-outline-warning btn-sm user-edit" data-id="${u.id}"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-outline-danger btn-sm user-delete" data-id="${u.id}"><i class="bi bi-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+      tbody.querySelectorAll('.user-view').forEach(el => { el.addEventListener('click', function() { viewUser(this.dataset.id); }); });
+      tbody.querySelectorAll('.user-edit').forEach(el => { el.addEventListener('click', function() { editUser(this.dataset.id); }); });
+      tbody.querySelectorAll('.user-delete').forEach(el => { el.addEventListener('click', function() { deleteUser(this.dataset.id); }); });
+
+      renderPagination('userPagination', total, page, perPage, (p) => { userPage = p; renderUsers(); });
+      updateSortIndicators('userTable', 'user');
+    }
+
+    function viewUser(id) {
+      const u = DB.users.find(r => r.id === id);
+      if (!u) return;
+      alert(`User Details:\n\nName: ${u.name}\nEmail: ${u.email}\nRole: ${u.role}\nStatus: ${u.status}\nCreated: ${formatDateTime(u.createdAt)}`);
+    }
+
+    function editUser(id) {
+      const u = DB.users.find(r => r.id === id);
+      if (!u) return;
+      document.getElementById('userFormId').value = u.id;
+      document.getElementById('userFormName').value = u.name;
+      document.getElementById('userFormEmail').value = u.email;
+      document.getElementById('userFormRole').value = u.role;
+      document.getElementById('userFormStatus').value = u.status;
+      document.getElementById('userPasswordWrap').style.display = 'none';
+      document.getElementById('userModalTitle').textContent = 'Edit User';
+      openModal('userModal');
+    }
+
+    function deleteUser(id) {
+      const u = DB.users.find(r => r.id === id);
+      if (u && u.role === 'Admin') { showToast('Cannot delete Admin user', 'warning'); return; }
+      confirmDelete('Are you sure you want to delete this user?', function() {
+        let users = DB.users;
+        users = users.filter(r => r.id !== id);
+        DB.users = users;
+        logActivity('System', 'Delete', 'User', id, `Deleted user ${u?.name || ''}`);
+        renderUsers();
+        showToast('User deleted successfully', 'danger');
+      });
+    }
+
+    function saveUser() {
+      const id = document.getElementById('userFormId').value;
+      const data = {
+        name: document.getElementById('userFormName').value.trim(),
+        email: document.getElementById('userFormEmail').value.trim(),
+        role: document.getElementById('userFormRole').value,
+        status: document.getElementById('userFormStatus').value,
+      };
+      if (!data.name || !data.email) { showToast('Please fill required fields', 'warning'); return; }
+      let users = DB.users;
+      if (id) {
+        const idx = users.findIndex(r => r.id === id);
+        if (idx > -1) {
+          users[idx] = { ...users[idx], ...data, updatedAt: now() };
+          DB.users = users;
+          logActivity('System', 'Update', 'User', id, `Updated user ${data.name}`);
+          showToast('User updated successfully');
+        }
+      } else {
+        const pwd = document.getElementById('userFormPassword').value;
+        if (!pwd || pwd.length < 4) { showToast('Password must be at least 4 characters', 'warning'); return; }
+        const newU = { ...data, id: uid(), password: pwd, createdAt: now(), updatedAt: now() };
+        users.push(newU);
+        DB.users = users;
+        logActivity('System', 'Add', 'User', newU.id, `Added user ${data.name} (${data.role})`);
+        showToast('User added successfully');
+      }
+      closeModal('userModal');
+      document.getElementById('userForm').reset();
+      document.getElementById('userFormId').value = '';
+      document.getElementById('userPasswordWrap').style.display = 'block';
+      document.getElementById('userModalTitle').textContent = 'Add User';
+      renderUsers();
+    }
+
+    // ================================================================
+    //  ACTIVITY LOG
+    // ================================================================
+    let activityPage = 1, activityPerPage = 10;
+
+    function getActivityFilters() {
+      const users = DB.users;
+      const sel = document.getElementById('activityFilterUser');
+      const current = sel.value;
+      sel.innerHTML = '<option value="all">All Users</option>' + users.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+      sel.value = current;
+
+      return {
+        search: document.getElementById('activitySearch').value.toLowerCase(),
+        user: document.getElementById('activityFilterUser').value,
+        action: document.getElementById('activityFilterAction').value,
+        module: document.getElementById('activityFilterModule').value,
+        dateFrom: document.getElementById('activityDateFrom').value,
+        dateTo: document.getElementById('activityDateTo').value,
+      };
+    }
+
+    function filterActivities(data, filters) {
+      return data.filter(a => {
+        if (filters.search && !a.user.toLowerCase().includes(filters.search) && !a.description.toLowerCase().includes(filters.search) && !a.module.toLowerCase().includes(filters.search)) return false;
+        if (filters.user !== 'all' && a.user !== filters.user) return false;
+        if (filters.action !== 'all' && a.action !== filters.action) return false;
+        if (filters.module !== 'all' && a.module !== filters.module) return false;
+        if (filters.dateFrom && a.dateTime.slice(0,10) < filters.dateFrom) return false;
+        if (filters.dateTo && a.dateTime.slice(0,10) > filters.dateTo) return false;
+        return true;
+      });
+    }
+
+    function renderActivityLog() {
+      const filters = getActivityFilters();
+      const all = DB.activityLogs;
+      const filtered = filterActivities(all, filters);
+      const s = getSortState('activity');
+      const sorted = sortData(filtered, s.field, s.dir);
+      const total = sorted.length;
+      const perPage = activityPerPage;
+      const page = Math.min(activityPage, Math.ceil(total / perPage) || 1);
+      activityPage = page;
+      const start = (page - 1) * perPage;
+      const end = Math.min(start + perPage, total);
+      const pageData = sorted.slice(start, end);
+
+      const tbody = document.getElementById('activityTableBody');
+      if (pageData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><i class="bi bi-inbox"></i>No activities found</div></td></tr>`;
+      } else {
+        tbody.innerHTML = pageData.map(a => `
+          <tr>
+            <td>${formatDateTime(a.dateTime)}</td>
+            <td><strong>${a.user}</strong></td>
+            <td><span class="badge ${a.action==='Add'?'bg-success bg-opacity-10 text-success':a.action==='Update'?'bg-warning bg-opacity-10 text-warning':'bg-danger bg-opacity-10 text-danger'}">${a.action}</span></td>
+            <td><span class="badge bg-secondary bg-opacity-10 text-dark">${a.module}</span></td>
+            <td>${a.description}</td>
+          </tr>
+        `).join('');
+      }
+      renderPagination('activityPagination', total, page, perPage, (p) => { activityPage = p; renderActivityLog(); });
+      updateSortIndicators('activityTable', 'activity');
+    }
+
+    // ================================================================
+    //  GLOBAL SEARCH
+    // ================================================================
+    function performGlobalSearch(query) {
+      const results = document.getElementById('globalSearchResults');
+      if (!query.trim()) { results.style.display = 'none'; return; }
+      const q = query.toLowerCase().trim();
+      const donations = DB.donations.filter(d => d.donorName.toLowerCase().includes(q) || d.mobile.includes(q) || d.event.toLowerCase().includes(q));
+      const expenses = DB.expenses.filter(e => e.item.toLowerCase().includes(q) || e.category.toLowerCase().includes(q) || e.event.toLowerCase().includes(q));
+      const users = DB.users.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.role.toLowerCase().includes(q));
+      const events = getEventList().filter(ev => ev.toLowerCase().includes(q));
+
+      let html = '';
+      if (donations.length === 0 && expenses.length === 0 && users.length === 0 && events.length === 0) {
+        html = '<div class="result-item text-muted">No results found</div>';
+      } else {
+        donations.slice(0,5).forEach(d => {
+          html += `<div class="result-item"><strong>${d.donorName}</strong> <span class="badge-module">Donation</span> ${formatCurrency(d.amount)} <span class="text-muted">${d.event}</span></div>`;
+        });
+        expenses.slice(0,5).forEach(e => {
+          html += `<div class="result-item"><strong>${e.item}</strong> <span class="badge-module">Expense</span> ${formatCurrency(e.amount)} <span class="text-muted">${e.event}</span></div>`;
+        });
+        users.slice(0,5).forEach(u => {
+          html += `<div class="result-item"><strong>${u.name}</strong> <span class="badge-module">User</span> ${u.email} <span class="text-muted">${u.role}</span></div>`;
+        });
+        events.slice(0,5).forEach(ev => {
+          html += `<div class="result-item"><strong>${ev}</strong> <span class="badge-module">Event</span></div>`;
+        });
+      }
+      results.innerHTML = html;
+      results.style.display = 'block';
+    }
+
+    // ================================================================
+    //  SORT INDICATORS
+    // ================================================================
+    function updateSortIndicators(tableId, key) {
+      const s = getSortState(key);
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      const ths = table.querySelectorAll('thead th');
+      ths.forEach(th => {
+        const field = th.dataset.sort;
+        if (!field) return;
+        const icon = th.querySelector('i');
+        if (!icon) return;
+        if (field === s.field) {
+          icon.className = s.dir === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
+          icon.style.opacity = '1';
+        } else {
+          icon.className = 'bi bi-arrow-up';
+          icon.style.opacity = '0.3';
+        }
+      });
+    }
+
+    // ================================================================
+    //  RENDER ALL REPORTS
+    // ================================================================
+    function renderAllReports() {
+      renderProfitLoss();
+      renderEventReport();
+    }
+
+    // ================================================================
+    //  NAVIGATION
+    // ================================================================
+    function navigateTo(page) {
+      document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById('page-' + page);
+      if (target) target.classList.add('active');
+      const link = document.querySelector(`.sidebar .nav-link[data-page="${page}"]`);
+      if (link) link.classList.add('active');
+      const titles = {
+        dashboard: 'Dashboard <small>overview</small>',
+        addentry: 'Quick Entry <small>donation / expense</small>',
+        donations: 'Donations <small>manage</small>',
+        expenses: 'Expenses <small>manage</small>',
+        profitloss: 'Profit & Loss <small>report</small>',
+        eventreport: 'Event Report <small>summary</small>',
+        users: 'Users <small>manage</small>',
+        activitylog: 'Activity Log <small>audit</small>',
+      };
+      document.getElementById('pageTitle').innerHTML = titles[page] || 'Utsav Hisab';
+      // render
+      if (page === 'dashboard') renderDashboard();
+      else if (page === 'addentry') { /* already rendered */ }
+      else if (page === 'donations') renderDonations();
+      else if (page === 'expenses') renderExpenses();
+      else if (page === 'profitloss') renderProfitLoss();
+      else if (page === 'eventreport') renderEventReport();
+      else if (page === 'users') renderUsers();
+      else if (page === 'activitylog') renderActivityLog();
+      // close sidebar mobile
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+
+    // ================================================================
+    //  RESET FILTERS
+    // ================================================================
+    function resetDonationFilters() {
+      document.getElementById('donationSearch').value = '';
+      document.getElementById('donationFilterEvent').value = 'all';
+      document.getElementById('donationFilterPayment').value = 'all';
+      document.getElementById('donationDateFrom').value = '';
+      document.getElementById('donationDateTo').value = '';
+      donationPage = 1;
+      renderDonations();
+    }
+
+    function resetExpenseFilters() {
+      document.getElementById('expenseSearch').value = '';
+      document.getElementById('expenseFilterEvent').value = 'all';
+      document.getElementById('expenseFilterCategory').value = 'all';
+      document.getElementById('expenseFilterPayment').value = 'all';
+      document.getElementById('expenseDateFrom').value = '';
+      document.getElementById('expenseDateTo').value = '';
+      expensePage = 1;
+      renderExpenses();
+    }
+
+    function resetPLFilters() {
+      document.getElementById('plSearch').value = '';
+      document.getElementById('plFilterEvent').value = 'all';
+      document.getElementById('plDateFrom').value = '';
+      document.getElementById('plDateTo').value = '';
+      renderProfitLoss();
+    }
+
+    function resetERFilters() {
+      document.getElementById('erSearch').value = '';
+      document.getElementById('erFilterEvent').value = 'all';
+      document.getElementById('erDateFrom').value = '';
+      document.getElementById('erDateTo').value = '';
+      renderEventReport();
+    }
+
+    function resetUserFilters() {
+      document.getElementById('userSearch').value = '';
+      document.getElementById('userFilterRole').value = 'all';
+      document.getElementById('userFilterStatus').value = 'all';
+      userPage = 1;
+      renderUsers();
+    }
+
+    function resetActivityFilters() {
+      document.getElementById('activitySearch').value = '';
+      document.getElementById('activityFilterUser').value = 'all';
+      document.getElementById('activityFilterAction').value = 'all';
+      document.getElementById('activityFilterModule').value = 'all';
+      document.getElementById('activityDateFrom').value = '';
+      document.getElementById('activityDateTo').value = '';
+      activityPage = 1;
+      renderActivityLog();
+    }
+
+    // ================================================================
+    //  INIT
+    // ================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+
+      // ---- SIDEBAR ----
+      document.querySelectorAll('.sidebar .nav-link').forEach(el => {
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          const page = this.dataset.page;
+          if (page) navigateTo(page);
+        });
+      });
+      document.getElementById('sidebarToggle').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('show');
+      });
+      document.getElementById('sidebarOverlay').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.remove('open');
+        this.classList.remove('show');
+      });
+
+      // ---- HEADER BUTTONS (Add Donation / Add Expense) ----
+      document.getElementById('headerAddDonation').addEventListener('click', function() {
+        document.getElementById('donationForm').reset();
+        document.getElementById('donationFormId').value = '';
+        document.getElementById('donationModalTitle').textContent = 'Add Donation';
+        openModal('donationModal');
+      });
+      document.getElementById('headerAddExpense').addEventListener('click', function() {
+        document.getElementById('expenseForm').reset();
+        document.getElementById('expenseFormId').value = '';
+        document.getElementById('expenseModalTitle').textContent = 'Add Expense';
+        openModal('expenseModal');
+      });
+
+      // ---- DASHBOARD ----
+      document.getElementById('dashApplyFilter').addEventListener('click', renderDashboard);
+      document.getElementById('dashSearch').addEventListener('input', renderDashboard);
+      document.getElementById('dashEvent').addEventListener('change', renderDashboard);
+      document.getElementById('dashDateRange').addEventListener('change', function() { renderDashboard(); });
+
+      // ---- QUICK ENTRY ----
+      initQuickEntry();
+      document.getElementById('qeDate').value = today();
+
+      // ---- DONATIONS ----
+      document.getElementById('donationAddBtn').addEventListener('click', function() {
+        document.getElementById('donationForm').reset();
+        document.getElementById('donationFormId').value = '';
+        document.getElementById('donationModalTitle').textContent = 'Add Donation';
+        openModal('donationModal');
+      });
+      document.getElementById('donationFormSave').addEventListener('click', saveDonation);
+      document.getElementById('donationResetFilters').addEventListener('click', resetDonationFilters);
+      document.getElementById('donationSearch').addEventListener('input', function() { donationPage = 1; renderDonations(); });
+      document.getElementById('donationFilterEvent').addEventListener('change', function() { donationPage = 1; renderDonations(); });
+      document.getElementById('donationFilterPayment').addEventListener('change', function() { donationPage = 1; renderDonations(); });
+      document.getElementById('donationDateFrom').addEventListener('change', function() { donationPage = 1; renderDonations(); });
+      document.getElementById('donationDateTo').addEventListener('change', function() { donationPage = 1; renderDonations(); });
+      document.querySelectorAll('#donationTable thead th[data-sort]').forEach(th => {
+        th.addEventListener('click', function() {
+          const field = this.dataset.sort;
+          toggleSort('donation', field);
+          renderDonations();
+        });
+      });
+
+      // ---- EXPENSES ----
+      document.getElementById('expenseAddBtn').addEventListener('click', function() {
+        document.getElementById('expenseForm').reset();
+        document.getElementById('expenseFormId').value = '';
+        document.getElementById('expenseModalTitle').textContent = 'Add Expense';
+        openModal('expenseModal');
+      });
+      document.getElementById('expenseFormSave').addEventListener('click', saveExpense);
+      document.getElementById('expenseResetFilters').addEventListener('click', resetExpenseFilters);
+      document.getElementById('expenseSearch').addEventListener('input', function() { expensePage = 1; renderExpenses(); });
+      document.getElementById('expenseFilterEvent').addEventListener('change', function() { expensePage = 1; renderExpenses(); });
+      document.getElementById('expenseFilterCategory').addEventListener('change', function() { expensePage = 1; renderExpenses(); });
+      document.getElementById('expenseFilterPayment').addEventListener('change', function() { expensePage = 1; renderExpenses(); });
+      document.getElementById('expenseDateFrom').addEventListener('change', function() { expensePage = 1; renderExpenses(); });
+      document.getElementById('expenseDateTo').addEventListener('change', function() { expensePage = 1; renderExpenses(); });
+      document.querySelectorAll('#expenseTable thead th[data-sort]').forEach(th => {
+        th.addEventListener('click', function() {
+          const field = this.dataset.sort;
+          toggleSort('expense', field);
+          renderExpenses();
+        });
+      });
+
+      // ---- PROFIT & LOSS ----
+      document.getElementById('plResetFilters').addEventListener('click', resetPLFilters);
+      document.getElementById('plSearch').addEventListener('input', renderProfitLoss);
+      document.getElementById('plFilterEvent').addEventListener('change', renderProfitLoss);
+      document.getElementById('plDateFrom').addEventListener('change', renderProfitLoss);
+      document.getElementById('plDateTo').addEventListener('change', renderProfitLoss);
+      document.querySelectorAll('#plTable thead th[data-sort]').forEach(th => {
+        th.addEventListener('click', function() {
+          const field = this.dataset.sort;
+          toggleSort('pl', field);
+          renderProfitLoss();
+        });
+      });
+
+      // ---- EVENT REPORT ----
+      document.getElementById('erResetFilters').addEventListener('click', resetERFilters);
+      document.getElementById('erSearch').addEventListener('input', renderEventReport);
+      document.getElementById('erFilterEvent').addEventListener('change', renderEventReport);
+      document.getElementById('erDateFrom').addEventListener('change', renderEventReport);
+      document.getElementById('erDateTo').addEventListener('change', renderEventReport);
+      document.querySelectorAll('#erTable thead th[data-sort]').forEach(th => {
+        th.addEventListener('click', function() {
+          const field = this.dataset.sort;
+          toggleSort('er', field);
+          renderEventReport();
+        });
+      });
+
+      // ---- USERS ----
+      document.getElementById('userAddBtn').addEventListener('click', function() {
+        document.getElementById('userForm').reset();
+        document.getElementById('userFormId').value = '';
+        document.getElementById('userPasswordWrap').style.display = 'block';
+        document.getElementById('userModalTitle').textContent = 'Add User';
+        openModal('userModal');
+      });
+      document.getElementById('userFormSave').addEventListener('click', saveUser);
+      document.getElementById('userResetFilters').addEventListener('click', resetUserFilters);
+      document.getElementById('userSearch').addEventListener('input', function() { userPage = 1; renderUsers(); });
+      document.getElementById('userFilterRole').addEventListener('change', function() { userPage = 1; renderUsers(); });
+      document.getElementById('userFilterStatus').addEventListener('change', function() { userPage = 1; renderUsers(); });
+      document.querySelectorAll('#userTable thead th[data-sort]').forEach(th => {
+        th.addEventListener('click', function() {
+          const field = this.dataset.sort;
+          toggleSort('user', field);
+          renderUsers();
+        });
+      });
+
+      // ---- ACTIVITY LOG ----
+      document.getElementById('activityResetFilters').addEventListener('click', resetActivityFilters);
+      document.getElementById('activitySearch').addEventListener('input', function() { activityPage = 1; renderActivityLog(); });
+      document.getElementById('activityFilterUser').addEventListener('change', function() { activityPage = 1; renderActivityLog(); });
+      document.getElementById('activityFilterAction').addEventListener('change', function() { activityPage = 1; renderActivityLog(); });
+      document.getElementById('activityFilterModule').addEventListener('change', function() { activityPage = 1; renderActivityLog(); });
+      document.getElementById('activityDateFrom').addEventListener('change', function() { activityPage = 1; renderActivityLog(); });
+      document.getElementById('activityDateTo').addEventListener('change', function() { activityPage = 1; renderActivityLog(); });
+      document.querySelectorAll('#activityTable thead th[data-sort]').forEach(th => {
+        th.addEventListener('click', function() {
+          const field = this.dataset.sort;
+          toggleSort('activity', field);
+          renderActivityLog();
+        });
+      });
+
+      // ---- GLOBAL SEARCH ----
+      const gsInput = document.getElementById('globalSearchInput');
+      gsInput.addEventListener('input', function() { performGlobalSearch(this.value); });
+      gsInput.addEventListener('blur', function() { setTimeout(() => { document.getElementById('globalSearchResults').style.display = 'none'; }, 200); });
+      gsInput.addEventListener('focus', function() { if (this.value.trim()) performGlobalSearch(this.value); });
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.global-search')) {
+          document.getElementById('globalSearchResults').style.display = 'none';
+        }
+      });
+
+      // ---- NAVIGATE TO DASHBOARD BY DEFAULT ----
+      navigateTo('dashboard');
+
+      // ---- AUTO REFRESH ----
+      setInterval(() => {
+        const active = document.querySelector('.page-section.active');
+        if (active) {
+          const id = active.id.replace('page-', '');
+          if (id === 'dashboard') renderDashboard();
+          else if (id === 'donations') renderDonations();
+          else if (id === 'expenses') renderExpenses();
+          else if (id === 'profitloss') renderProfitLoss();
+          else if (id === 'eventreport') renderEventReport();
+          else if (id === 'users') renderUsers();
+          else if (id === 'activitylog') renderActivityLog();
+        }
+      }, 15000);
+    });
+
+  })();
+</script>
+</body>
+</html>
