@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="gu">
 <head>
@@ -407,7 +406,7 @@ textarea{resize:vertical;min-height:60px;}
 
     <div class="btn-row">
       <button class="btn secondary" onclick="clearEntry()">Clear</button>
-      <button class="btn gold" onclick="saveEntry()">Save Entry</button>
+      <button class="btn gold" id="qeSaveBtn" onclick="saveEntry()">Save Entry</button>
     </div>
   </div>
 </div>
@@ -447,6 +446,8 @@ textarea{resize:vertical;min-height:60px;}
     <input id="sevaName" placeholder="e.g. Sharma Decorators">
     <label>Item *</label>
     <input id="sevaItem" placeholder="e.g. Mandap Decoration">
+    <label>Mobile</label>
+    <input id="sevaMobile" type="tel" placeholder="10 digit mobile (SMS mate)" maxlength="10">
     <div class="btn-row">
       <button class="btn secondary" onclick="clearSevaForm()">Clear</button>
       <button class="btn gold" id="sevaSaveBtn" onclick="saveSevaItem()">Save Item</button>
@@ -594,6 +595,35 @@ function toast(msg){
   setTimeout(()=>t.classList.remove('show'),1800);
 }
 
+/* ---------- SMS (Thank You SMS - opens phone's SMS app, using saved template) ---------- */
+function getSmsTemplate(){
+  const raw = localStorage.getItem(DB.sms);
+  try{ return raw ? JSON.parse(raw) : DEFAULT_SMS; }catch(e){ return raw || DEFAULT_SMS; }
+}
+function buildSmsMessage(name, amount, event){
+  const tpl = getSmsTemplate();
+  return tpl
+    .split('{name}').join(name || '')
+    .split('{amount}').join(amount || '')
+    .split('{event}').join(event || '');
+}
+function normalizeMobile(mobile){
+  if(!mobile) return '';
+  return String(mobile).replace(/[^0-9+]/g,'');
+}
+/* Opens the device's native SMS app pre-filled with the Thank You message.
+   Works for Donation entries and Seva Item entries whenever a mobile number is present.
+   No paid SMS gateway/API is used - the user just taps Send in their own SMS app. */
+function sendThankYouSms(mobile, name, amount, event){
+  const num = normalizeMobile(mobile);
+  if(!num){ return; }
+  const msg = buildSmsMessage(name, amount, event);
+  const body = encodeURIComponent(msg);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const link = isIOS ? `sms:${num}&body=${body}` : `sms:${num}?body=${body}`;
+  window.location.href = link;
+}
+
 /* ---------- NAV ---------- */
 const PAGES=['dashboard','entry','donations','expenses','seva','pl','events','users','activity','theme','sms'];
 function go(page){
@@ -624,10 +654,30 @@ function refreshItemDropdown(){
   sel.innerHTML='<option value="">-- Select from Seva Items --</option>' +
     items.map(i=>`<option value="${escAttr(i.item)}">${escHtml(i.item)} (${escHtml(i.name)})</option>`).join('');
 }
+let editingDonationId=null;
 function clearEntry(){
   ['qeDonor','qeMobile','qeAmount','qeRemark'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('qeItem').value='';
   document.getElementById('qeDate').value=today();
+  editingDonationId=null;
+  const btn=document.getElementById('qeSaveBtn');
+  if(btn) btn.textContent='Save Entry';
+}
+function editDonation(id){
+  const d=getDonations().find(x=>x.id===id);
+  if(!d) return;
+  go('entry');
+  setEntryType('donation');
+  document.getElementById('qeDonor').value=d.donor;
+  document.getElementById('qeMobile').value=d.mobile;
+  document.getElementById('qeEvent').value=d.event;
+  document.getElementById('qeAmount').value=d.amount;
+  document.getElementById('qeMode').value=d.mode;
+  document.getElementById('qeDate').value=d.date;
+  document.getElementById('qeRemark').value=d.remark;
+  editingDonationId=id;
+  const btn=document.getElementById('qeSaveBtn');
+  if(btn) btn.textContent='Update Entry';
 }
 function saveEntry(){
   const event=document.getElementById('qeEvent').value;
@@ -642,9 +692,18 @@ function saveEntry(){
     if(!donor){ toast('Donor Name bharo'); return; }
     const mobile=document.getElementById('qeMobile').value.trim();
     const arr=load(DB.donations);
-    arr.unshift({id:uid(), donor, mobile, event, amount, mode, date, remark});
-    save(DB.donations, arr);
-    logActivity('Add','Donation', donor+' - '+fmt(amount));
+    if(editingDonationId){
+      const idx=arr.findIndex(x=>x.id===editingDonationId);
+      if(idx>-1){ arr[idx]={...arr[idx], donor, mobile, event, amount, mode, date, remark}; }
+      save(DB.donations, arr);
+      logActivity('Update','Donation', donor+' - '+fmt(amount));
+    } else {
+      arr.unshift({id:uid(), donor, mobile, event, amount, mode, date, remark});
+      save(DB.donations, arr);
+      logActivity('Add','Donation', donor+' - '+fmt(amount));
+    }
+    /* Send Thank You SMS whenever a mobile number is available (on both new and edited entries) */
+    if(mobile){ sendThankYouSms(mobile, donor, fmt(amount), event); }
   } else {
     const item=document.getElementById('qeItem').value;
     const category=document.getElementById('qeCategory').value;
@@ -671,10 +730,19 @@ function renderDonations(){
       <div class="li-main">
         <div class="name">${escHtml(d.donor)}</div>
         <div class="meta">${escHtml(d.event)} • ${escHtml(d.mode)} ${d.mobile?'• '+escHtml(d.mobile):''}</div>
-        <div class="li-actions"><button onclick="deleteDonation('${d.id}')" class="del"><i class="bi bi-trash-fill"></i> Delete</button></div>
+        <div class="li-actions">
+          <button onclick="editDonation('${d.id}')"><i class="bi bi-pencil-fill"></i> Edit</button>
+          ${d.mobile?`<button onclick="resendDonationSms('${d.id}')"><i class="bi bi-chat-dots-fill"></i> Send SMS</button>`:''}
+          <button onclick="deleteDonation('${d.id}')" class="del"><i class="bi bi-trash-fill"></i> Delete</button>
+        </div>
       </div>
       <div class="li-amt donation"><div class="amt">${fmt(d.amount)}</div><div class="date">${d.date}</div></div>
     </div>`).join('');
+}
+function resendDonationSms(id){
+  const d=getDonations().find(x=>x.id===id);
+  if(!d || !d.mobile){ toast('Mobile number nathi'); return; }
+  sendThankYouSms(d.mobile, d.donor, fmt(d.amount), d.event);
 }
 function deleteDonation(id){
   if(!confirm('Delete this donation?'))return;
@@ -713,22 +781,26 @@ function getSevaItems(){ return load(DB.seva); }
 function clearSevaForm(){
   document.getElementById('sevaName').value='';
   document.getElementById('sevaItem').value='';
+  document.getElementById('sevaMobile').value='';
   editingSevaId=null;
   document.getElementById('sevaSaveBtn').textContent='Save Item';
 }
 function saveSevaItem(){
   const name=document.getElementById('sevaName').value.trim();
   const item=document.getElementById('sevaItem').value.trim();
+  const mobile=document.getElementById('sevaMobile').value.trim();
   if(!name || !item){ toast('Name ane Item banne bharo'); return; }
   let arr=getSevaItems();
   if(editingSevaId){
-    arr=arr.map(x=>x.id===editingSevaId?{...x,name,item}:x);
+    arr=arr.map(x=>x.id===editingSevaId?{...x,name,item,mobile}:x);
     logActivity('Update','Seva Item', name+' - '+item);
   } else {
-    arr.unshift({id:uid(), name, item});
+    arr.unshift({id:uid(), name, item, mobile});
     logActivity('Add','Seva Item', name+' - '+item);
   }
   save(DB.seva, arr);
+  /* Send Thank You SMS whenever a mobile number is given for the Seva (on both new and edited entries) */
+  if(mobile){ sendThankYouSms(mobile, name, '', item); }
   toast('Seva Item saved');
   clearSevaForm();
   renderAll();
@@ -738,9 +810,15 @@ function editSevaItem(id){
   if(!it)return;
   document.getElementById('sevaName').value=it.name;
   document.getElementById('sevaItem').value=it.item;
+  document.getElementById('sevaMobile').value=it.mobile||'';
   editingSevaId=id;
   document.getElementById('sevaSaveBtn').textContent='Update Item';
   document.getElementById('page-seva').scrollIntoView({behavior:'smooth'});
+}
+function resendSevaSms(id){
+  const it=getSevaItems().find(x=>x.id===id);
+  if(!it || !it.mobile){ toast('Mobile number nathi'); return; }
+  sendThankYouSms(it.mobile, it.name, '', it.item);
 }
 function deleteSevaItem(id){
   if(!confirm('Delete this seva item?'))return;
@@ -757,9 +835,10 @@ function renderSevaItems(){
     <div class="list-item">
       <div class="li-main">
         <div class="name">${escHtml(x.item)}</div>
-        <div class="meta">${escHtml(x.name)}</div>
+        <div class="meta">${escHtml(x.name)} ${x.mobile?'• '+escHtml(x.mobile):''}</div>
         <div class="li-actions">
           <button onclick="editSevaItem('${x.id}')"><i class="bi bi-pencil-fill"></i> Edit</button>
+          ${x.mobile?`<button onclick="resendSevaSms('${x.id}')"><i class="bi bi-chat-dots-fill"></i> Send SMS</button>`:''}
           <button onclick="deleteSevaItem('${x.id}')" class="del"><i class="bi bi-trash-fill"></i> Delete</button>
         </div>
       </div>
