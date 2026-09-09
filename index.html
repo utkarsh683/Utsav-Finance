@@ -351,6 +351,14 @@ textarea{resize:vertical;min-height:60px;}
     <div class="stat expense"><div class="label">Total Expense</div><div class="value" id="dTotalExpense">₹0</div></div>
     <div class="stat"><div class="label">Balance</div><div class="value" id="dBalance">₹0</div></div>
     <div class="stat pl"><div class="label">Profit / Loss</div><div class="value" id="dPL">₹0</div></div>
+    <div class="stat"><div class="label">Total Seva Items</div><div class="value" id="dTotalSeva">0</div></div>
+  </div>
+  <div class="card">
+    <h3>Export All Data</h3>
+    <div class="export-row" style="margin-top:10px">
+      <button onclick="exportAllExcel()"><i class="bi bi-file-earmark-excel-fill"></i> Overall Excel</button>
+      <button onclick="exportAllPDF()"><i class="bi bi-file-earmark-pdf-fill"></i> Overall PDF</button>
+    </div>
   </div>
   <div class="card">
     <h3>Recent Donations</h3>
@@ -359,6 +367,10 @@ textarea{resize:vertical;min-height:60px;}
   <div class="card">
     <h3>Recent Expenses</h3>
     <div id="dRecentExpenses"><div class="empty-state">No expenses yet</div></div>
+  </div>
+  <div class="card">
+    <h3>Recent Seva Items</h3>
+    <div id="dRecentSeva"><div class="empty-state">No seva items yet</div></div>
   </div>
 </div>
 
@@ -380,8 +392,9 @@ textarea{resize:vertical;min-height:60px;}
 
     <div id="qeExpenseFields" style="display:none">
       <label>Expense Item *</label>
-      <select id="qeItem"><option value="">-- Select from Seva Items --</option></select>
-      <div class="hint">Item list Seva Items page mathi aave che. Ekhaniya add karva "Seva Items" ma jaao.</div>
+      <input id="qeItem" list="qeItemSuggestions" placeholder="e.g. Mandap Decoration" autocomplete="off">
+      <datalist id="qeItemSuggestions"></datalist>
+      <div class="hint">Tame koi pan item name type kari shako cho. Seva Items ma save kareli items suggestion ma dekhaashe.</div>
       <label>Category *</label>
       <select id="qeCategory">
         <option>Decoration</option><option>Food</option><option>Sound System</option>
@@ -417,7 +430,7 @@ textarea{resize:vertical;min-height:60px;}
   <div class="card">
     <div class="search-wrap"><i class="bi bi-search"></i><input id="donSearch" placeholder="Search donor / mobile" oninput="renderDonations()"></div>
     <div class="export-row" style="margin-top:10px">
-      <button onclick="exportCSV(getDonations(),'donations')"><i class="bi bi-file-earmark-excel-fill"></i> Excel</button>
+      <button onclick="exportExcel(getDonations(),'donations','Donations')"><i class="bi bi-file-earmark-excel-fill"></i> Excel</button>
       <button onclick="exportPDF('Donations', getDonations(), ['donor','mobile','event','amount','mode','date'])"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</button>
     </div>
   </div>
@@ -430,7 +443,7 @@ textarea{resize:vertical;min-height:60px;}
   <div class="card">
     <div class="search-wrap"><i class="bi bi-search"></i><input id="expSearch" placeholder="Search item / category" oninput="renderExpenses()"></div>
     <div class="export-row" style="margin-top:10px">
-      <button onclick="exportCSV(getExpenses(),'expenses')"><i class="bi bi-file-earmark-excel-fill"></i> Excel</button>
+      <button onclick="exportExcel(getExpenses(),'expenses','Expenses')"><i class="bi bi-file-earmark-excel-fill"></i> Excel</button>
       <button onclick="exportPDF('Expenses', getExpenses(), ['item','category','event','amount','mode','date'])"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</button>
     </div>
   </div>
@@ -456,7 +469,7 @@ textarea{resize:vertical;min-height:60px;}
   <div class="card">
     <div class="search-wrap"><i class="bi bi-search"></i><input id="sevaSearch" placeholder="Search name / item" oninput="renderSevaItems()"></div>
     <div class="export-row" style="margin-top:10px">
-      <button onclick="exportCSV(getSevaItems(),'seva-items')"><i class="bi bi-file-earmark-excel-fill"></i> Excel</button>
+      <button onclick="exportExcel(getSevaItems(),'seva-items','Seva Items')"><i class="bi bi-file-earmark-excel-fill"></i> Excel</button>
       <button onclick="exportPDF('Seva Items', getSevaItems(), ['name','item'])"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</button>
     </div>
   </div>
@@ -468,7 +481,7 @@ textarea{resize:vertical;min-height:60px;}
   <div class="section-title"><h2>Profit &amp; Loss</h2></div>
   <div class="card">
     <div class="export-row">
-      <button onclick="exportCSV(getPL(),'profit-loss')"><i class="bi bi-file-earmark-excel-fill"></i> Excel</button>
+      <button onclick="exportExcel(getPL(),'profit-loss','Profit-Loss')"><i class="bi bi-file-earmark-excel-fill"></i> Excel</button>
       <button onclick="exportPDF('Profit & Loss', getPL(), ['event','income','expense','profit','margin','status'])"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</button>
     </div>
   </div>
@@ -649,17 +662,21 @@ function setEntryType(t){
   document.getElementById('qeExpenseFields').style.display = t==='expense' ? 'block':'none';
 }
 function refreshItemDropdown(){
-  const sel=document.getElementById('qeItem');
+  const dl=document.getElementById('qeItemSuggestions');
+  if(!dl) return;
   const items=getSevaItems();
-  sel.innerHTML='<option value="">-- Select from Seva Items --</option>' +
-    items.map(i=>`<option value="${escAttr(i.item)}">${escHtml(i.item)} (${escHtml(i.name)})</option>`).join('');
+  const uniqueItems=[...new Set(items.map(i=>i.item))];
+  dl.innerHTML=uniqueItems.map(i=>`<option value="${escAttr(i)}"></option>`).join('');
 }
 let editingDonationId=null;
+let editingExpenseId=null;
 function clearEntry(){
   ['qeDonor','qeMobile','qeAmount','qeRemark'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('qeItem').value='';
+  document.getElementById('qeCategory').value='Decoration';
   document.getElementById('qeDate').value=today();
   editingDonationId=null;
+  editingExpenseId=null;
   const btn=document.getElementById('qeSaveBtn');
   if(btn) btn.textContent='Save Entry';
 }
@@ -676,6 +693,22 @@ function editDonation(id){
   document.getElementById('qeDate').value=d.date;
   document.getElementById('qeRemark').value=d.remark;
   editingDonationId=id;
+  const btn=document.getElementById('qeSaveBtn');
+  if(btn) btn.textContent='Update Entry';
+}
+function editExpense(id){
+  const d=getExpenses().find(x=>x.id===id);
+  if(!d) return;
+  go('entry');
+  setEntryType('expense');
+  document.getElementById('qeItem').value=d.item;
+  document.getElementById('qeCategory').value=d.category;
+  document.getElementById('qeEvent').value=d.event;
+  document.getElementById('qeAmount').value=d.amount;
+  document.getElementById('qeMode').value=d.mode;
+  document.getElementById('qeDate').value=d.date;
+  document.getElementById('qeRemark').value=d.remark;
+  editingExpenseId=id;
   const btn=document.getElementById('qeSaveBtn');
   if(btn) btn.textContent='Update Entry';
 }
@@ -705,13 +738,20 @@ function saveEntry(){
     /* Send Thank You SMS whenever a mobile number is available (on both new and edited entries) */
     if(mobile){ sendThankYouSms(mobile, donor, fmt(amount), event); }
   } else {
-    const item=document.getElementById('qeItem').value;
+    const item=document.getElementById('qeItem').value.trim();
     const category=document.getElementById('qeCategory').value;
-    if(!item){ toast('Expense Item pasand karo'); return; }
+    if(!item){ toast('Expense Item bharo'); return; }
     const arr=load(DB.expenses);
-    arr.unshift({id:uid(), item, category, event, amount, mode, date, remark});
-    save(DB.expenses, arr);
-    logActivity('Add','Expense', item+' - '+fmt(amount));
+    if(editingExpenseId){
+      const idx=arr.findIndex(x=>x.id===editingExpenseId);
+      if(idx>-1){ arr[idx]={...arr[idx], item, category, event, amount, mode, date, remark}; }
+      save(DB.expenses, arr);
+      logActivity('Update','Expense', item+' - '+fmt(amount));
+    } else {
+      arr.unshift({id:uid(), item, category, event, amount, mode, date, remark});
+      save(DB.expenses, arr);
+      logActivity('Add','Expense', item+' - '+fmt(amount));
+    }
   }
   toast('Entry saved');
   clearEntry();
@@ -763,7 +803,10 @@ function renderExpenses(){
       <div class="li-main">
         <div class="name">${escHtml(d.item)}</div>
         <div class="meta">${escHtml(d.category)} • ${escHtml(d.event)} • ${escHtml(d.mode)}</div>
-        <div class="li-actions"><button onclick="deleteExpense('${d.id}')" class="del"><i class="bi bi-trash-fill"></i> Delete</button></div>
+        <div class="li-actions">
+          <button onclick="editExpense('${d.id}')"><i class="bi bi-pencil-fill"></i> Edit</button>
+          <button onclick="deleteExpense('${d.id}')" class="del"><i class="bi bi-trash-fill"></i> Delete</button>
+        </div>
       </div>
       <div class="li-amt expense"><div class="amt">${fmt(d.amount)}</div><div class="date">${d.date}</div></div>
     </div>`).join('');
@@ -1070,27 +1113,157 @@ function renderDashboard(){
     <div class="list-item"><div class="li-main"><div class="name">${escHtml(d.item)}</div><div class="meta">${d.category} • ${d.date}</div></div>
     <div class="li-amt expense"><div class="amt">${fmt(d.amount)}</div></div></div>`).join('')
     : '<div class="empty-state">No expenses yet</div>';
+
+  const sevaItems=getSevaItems();
+  const dTotalSevaEl=document.getElementById('dTotalSeva');
+  if(dTotalSevaEl) dTotalSevaEl.textContent=sevaItems.length;
+  const rs=document.getElementById('dRecentSeva');
+  if(rs){
+    rs.innerHTML = sevaItems.length? sevaItems.slice(0,5).map(x=>`
+      <div class="list-item"><div class="li-main"><div class="name">${escHtml(x.item)}</div><div class="meta">${escHtml(x.name)} ${x.mobile?'• '+escHtml(x.mobile):''}</div></div></div>`).join('')
+      : '<div class="empty-state">No seva items yet</div>';
+  }
 }
 
 /* ---------- EXPORT ---------- */
-function exportCSV(rows, name){
-  if(!rows.length){ toast('Koi data nathi'); return; }
-  const headers=Object.keys(rows[0]).filter(k=>k!=='id');
-  const csv=[headers.join(',')].concat(rows.map(r=>headers.map(h=>`"${String(r[h]??'').replace(/"/g,'""')}"`).join(','))).join('\n');
-  const blob=new Blob([csv],{type:'text/csv'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name+'.csv'; a.click();
-  logActivity('Export','Settings', name+'.csv');
+/* Reliable file download: appends the link to the DOM before clicking it,
+   which some browsers / installed-PWA webviews require, otherwise the
+   download silently does nothing. */
+function downloadBlob(blob, filename){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
 }
+function cleanRows(rows){
+  return rows.map(r=>{ const {id, ...rest}=r; return rest; });
+}
+/* Real .xlsx file via SheetJS when available (best, opens perfectly in Excel/Sheets),
+   with a CSV fallback if the library failed to load (e.g. no internet). */
+function exportExcel(rows, name, sheetName){
+  if(!rows.length){ toast('Koi data nathi'); return; }
+  const data=cleanRows(rows);
+  if(window.XLSX){
+    const wb=XLSX.utils.book_new();
+    const ws=XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, (sheetName||'Sheet1').slice(0,31));
+    XLSX.writeFile(wb, name+'.xlsx');
+    logActivity('Export','Settings', name+'.xlsx');
+  } else {
+    const headers=Object.keys(data[0]||{});
+    const csv='\uFEFF'+[headers.join(',')].concat(data.map(r=>headers.map(h=>`"${String(r[h]??'').replace(/"/g,'""')}"`).join(','))).join('\n');
+    downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}), name+'.csv');
+    logActivity('Export','Settings', name+'.csv');
+    toast('Internet na hova thi simple CSV download thayu (Excel library load na thai)');
+  }
+}
+/* Kept for backward compatibility with any old references */
+function exportCSV(rows, name){ exportExcel(rows, name); }
+
+/* Real .pdf file via jsPDF+autotable when available, with the old
+   print-dialog method as fallback (fails inside installed PWAs / webviews
+   because they can't reliably open a second window). */
 function exportPDF(title, rows, cols){
   if(!rows.length){ toast('Koi data nathi'); return; }
-  const w=window.open('','_blank');
-  const style='<style>body{font-family:sans-serif;padding:20px}h2{color:#6B0F1A}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #ccc;padding:6px 8px;font-size:12px;text-align:left}th{background:#f2e6c8}</style>';
-  const rowsHtml=rows.map(r=>'<tr>'+cols.map(c=>`<td>${r[c]??''}</td>`).join('')+'</tr>').join('');
-  w.document.write(`<html><head><title>${title}</title>${style}</head><body><h2>${title} - Utsav-Finance</h2>
-    <table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table>
-    </body></html>`);
-  w.document.close(); w.focus();
-  setTimeout(()=>w.print(),400);
+  if(window.jspdf && window.jspdf.jsPDF){
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF();
+    doc.setFontSize(14); doc.setTextColor(107,15,26);
+    doc.text(title+' - Utsav-Finance', 14, 15);
+    doc.setFontSize(9); doc.setTextColor(120,120,120);
+    doc.text('Generated: '+new Date().toLocaleString(), 14, 21);
+    doc.autoTable({
+      startY:26,
+      head:[cols.map(c=>c.charAt(0).toUpperCase()+c.slice(1))],
+      body:rows.map(r=>cols.map(c=>String(r[c]??''))),
+      styles:{fontSize:9},
+      headStyles:{fillColor:[242,230,200], textColor:[107,15,26]}
+    });
+    doc.save(title.replace(/\s+/g,'-')+'.pdf');
+    logActivity('Export','Settings', title+'.pdf');
+  } else {
+    const w=window.open('','_blank');
+    if(!w){ toast('Popup blocked thai gayu, PDF library pan load na thai. Internet check karo.'); return; }
+    const style='<style>body{font-family:sans-serif;padding:20px}h2{color:#6B0F1A}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #ccc;padding:6px 8px;font-size:12px;text-align:left}th{background:#f2e6c8}</style>';
+    const rowsHtml=rows.map(r=>'<tr>'+cols.map(c=>`<td>${r[c]??''}</td>`).join('')+'</tr>').join('');
+    w.document.write(`<html><head><title>${title}</title>${style}</head><body><h2>${title} - Utsav-Finance</h2>
+      <table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table>
+      </body></html>`);
+    w.document.close(); w.focus();
+    setTimeout(()=>w.print(),400);
+  }
+}
+
+/* ---------- OVERALL EXPORT (Dashboard) ---------- */
+function exportAllExcel(){
+  const dons=getDonations(), exps=getExpenses(), seva=getSevaItems(), pl=getPL();
+  if(!dons.length && !exps.length && !seva.length){ toast('Koi data nathi'); return; }
+  if(window.XLSX){
+    const wb=XLSX.utils.book_new();
+    const addSheet=(rows, sheetName)=>{
+      const data=cleanRows(rows.length?rows:[{}]);
+      const ws=XLSX.utils.json_to_sheet(data);
+      XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0,31));
+    };
+    addSheet(dons,'Donations');
+    addSheet(exps,'Expenses');
+    addSheet(seva,'Seva Items');
+    addSheet(pl,'Profit-Loss');
+    XLSX.writeFile(wb, 'Utsav-Finance-Report-'+today()+'.xlsx');
+    logActivity('Export','Settings','Overall Excel Report');
+  } else {
+    toast('Excel library load na thai (internet check karo). Har list ni page par thi CSV export karo.');
+  }
+}
+function exportAllPDF(){
+  const dons=getDonations(), exps=getExpenses(), seva=getSevaItems(), pl=getPL();
+  if(!dons.length && !exps.length && !seva.length){ toast('Koi data nathi'); return; }
+  if(!(window.jspdf && window.jspdf.jsPDF)){
+    toast('PDF library load na thai (internet check karo).');
+    return;
+  }
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  const totalD=dons.reduce((s,d)=>s+Number(d.amount),0);
+  const totalE=exps.reduce((s,d)=>s+Number(d.amount),0);
+  doc.setFontSize(16); doc.setTextColor(107,15,26);
+  doc.text('Utsav-Finance - Overall Report', 14, 16);
+  doc.setFontSize(9); doc.setTextColor(120,120,120);
+  doc.text('Generated: '+new Date().toLocaleString(), 14, 22);
+  doc.setFontSize(11); doc.setTextColor(30,30,30);
+  doc.text(`Total Donation: ${fmt(totalD)}    Total Expense: ${fmt(totalE)}    Balance: ${fmt(totalD-totalE)}`, 14, 30);
+
+  const section=(title, rows, cols, startY)=>{
+    let y=startY;
+    if(y>270){ doc.addPage(); y=16; }
+    doc.setFontSize(13); doc.setTextColor(107,15,26);
+    doc.text(title, 14, y);
+    if(rows.length){
+      doc.autoTable({
+        startY:y+4,
+        head:[cols.map(c=>c.charAt(0).toUpperCase()+c.slice(1))],
+        body:rows.map(r=>cols.map(c=>String(r[c]??''))),
+        styles:{fontSize:8},
+        headStyles:{fillColor:[242,230,200], textColor:[107,15,26]}
+      });
+      return doc.lastAutoTable.finalY+12;
+    } else {
+      doc.setFontSize(9); doc.setTextColor(150,150,150);
+      doc.text('No data', 14, y+6);
+      return y+14;
+    }
+  };
+  let y=38;
+  y=section('Donations', dons, ['donor','mobile','event','amount','mode','date'], y);
+  y=section('Expenses', exps, ['item','category','event','amount','mode','date'], y);
+  y=section('Seva Items', seva, ['name','item','mobile'], y);
+  y=section('Profit & Loss', pl, ['event','income','expense','profit','margin','status'], y);
+
+  doc.save('Utsav-Finance-Report-'+today()+'.pdf');
+  logActivity('Export','Settings','Overall PDF Report');
 }
 function escHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escAttr(s){ return escHtml(s); }
@@ -1200,5 +1373,11 @@ if('serviceWorker' in navigator){
 }
 </script>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- Real Excel (.xlsx) and PDF (.pdf) file generation. Loaded from CDN, so the
+     device needs internet the first time; exportExcel()/exportPDF() fall back
+     to CSV / print-dialog automatically if these fail to load (offline use). -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>
